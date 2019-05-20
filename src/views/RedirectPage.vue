@@ -8,9 +8,9 @@ import HelloWorld from '@/components/HelloWorld.vue' // @ is an alias to /src
 
 @Component()
 export default class RedirectPage extends Vue {
-    mounted () {
-        const accessCode = this.$route.query.code
-        this.$store.dispatch('fetch-new-tokens', accessCode)
-    }
+  mounted () {
+    const accessCode = this.$router.query.code
+    this.$store.dispatch('fetchTokens', accessCode)
+  }
 }
 </script>
