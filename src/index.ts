@@ -1,24 +1,18 @@
 import { OpenIdConnectModule } from '@/modules/OpenIdConnectModule'
 import { openIdConnectRoutes } from '@/routes/OpenIdConnectRoutes'
-import { OpenIdConnectConfiguration } from '@/interfaces/OpenIdConnectConfiguration'
-import Router from 'vue-router'
-import { Store } from 'vuex'
+import { OpenIdConnectPluginOptions } from '@/interfaces/OpenIdConnectPluginOptions'
+import _Vue from 'vue'
 
-function install (store: Store<any>, router: Router, configuration: OpenIdConnectConfiguration) {
-  if (!store) throw new Error('Inuits-vuejs-oidc needs a store')
+export function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (Vue: typeof _Vue, options: any): void {
+  if (!options.store) throw new Error('Inuits-vuejs-oidc needs a store')
 
-  if (!router) throw new Error('Inuits-vuejs-oidc needs a router')
+  if (!options.router) throw new Error('Inuits-vuejs-oidc needs a router')
 
-  if (!configuration) throw new Error('Inuits-vuejs-oidc needs configuration')
+  if (!options.configuration) throw new Error('Inuits-vuejs-oidc needs configuration')
 
-  store.registerModule('OpenIdConnectModule', OpenIdConnectModule)
-  router.addRoutes(openIdConnectRoutes)
+  options.store.registerModule('OpenIdConnectModule', OpenIdConnectModule)
+  options.router.addRoutes(openIdConnectRoutes)
 }
 
-export default {
-  install
-}
-
-export {
-  OpenIdConnectConfiguration
-}
+export { OpenIdConnectPluginOptions } from '@/interfaces/OpenIdConnectPluginOptions'
+export { OpenIdConnectConfiguration } from '@/interfaces/OpenIdConnectConfiguration'
