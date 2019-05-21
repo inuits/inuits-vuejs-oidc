@@ -1,5 +1,7 @@
 import typescript from 'rollup-plugin-typescript2'
 import pkg from './package.json'
+import vue from 'rollup-plugin-vue'
+import commonjs from 'rollup-plugin-commonjs'
 export default {
   input: 'src/index.ts',
   output: [
@@ -17,8 +19,12 @@ export default {
     ...Object.keys(pkg.peerDependencies || {})
   ],
   plugins: [
+    commonjs(),
+    vue(),
     typescript({
-      typescript: require('typescript')
+      typescript: require('typescript'),
+      defaultLang: { script: 'ts' },
+      clean: true
     })
   ]
 }

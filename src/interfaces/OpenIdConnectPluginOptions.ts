@@ -1,4 +1,4 @@
-import { OpenIdConnectConfiguration } from '@/interfaces/OpenIdConnectConfiguration'
+import { OpenIdConnectConfiguration } from './OpenIdConnectConfiguration'
 import Router from 'vue-router'
 import { Store } from 'vuex'
 

@@ -4,13 +4,14 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import HelloWorld from '@/components/HelloWorld.vue' // @ is an alias to /src
 
-@Component()
+@Component
 export default class RedirectPage extends Vue {
   mounted () {
-    const accessCode = this.$router.query.code
-    this.$store.dispatch('fetchTokens', accessCode)
+    const accessCode = this.$route.query.code
+    this.$store.dispatch('openid/fetchTokens', accessCode).then((redirectPath) => {
+      this.$router.push(redirectPath)
+    })
   }
 }
 </script>
