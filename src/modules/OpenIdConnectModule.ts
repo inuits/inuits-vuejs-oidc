@@ -3,11 +3,14 @@ import { OpenIdConnectConfiguration } from '../interfaces/OpenIdConnectConfigura
 import { OpenIdConnectTokens } from '../interfaces/OpenIdConnectTokens'
 import axios from 'axios'
 import { OpenIdUrlHelpers } from '../utils/OpenIdUrlHelpers'
+import { TokenStorageHelpers } from '../utils/TokenStorageHelpers'
+import { OpenIdConnectRepository } from '../repositories/OpenIdConnectRepository'
 
 @Module({ namespaced: true, name: 'openid' })
 export class OpenIdConnectModule extends VuexModule {
-  accessToken: string = ''
-  refreshToken: string = ''
+  // Data
+  accessToken: string = TokenStorageHelpers.getSessionAccessToken()
+  refreshToken: string = TokenStorageHelpers.getSessionRefreshToken()
   configuration: OpenIdConnectConfiguration = {
     baseUrl: '',
     tokenEndpoint: '',
@@ -18,23 +21,37 @@ export class OpenIdConnectModule extends VuexModule {
     logoutRedirectPath: ''
   }
 
+  refreshTokenPromise?: Promise<any>
+
+  repository: OpenIdConnectRepository = new OpenIdConnectRepository(this.configuration)
+
+  // Mutations
   @Mutation
   clearTokens () {
     this.accessToken = ''
     this.refreshToken = ''
+    TokenStorageHelpers.clearSessionTokens()
   }
 
   @Mutation
   setTokens (tokens: OpenIdConnectTokens) {
     this.accessToken = tokens.accessToken
     this.refreshToken = tokens.refreshToken
+    TokenStorageHelpers.setSessionTokens(tokens)
   }
 
   @Mutation
   initializeConfig (configuration: OpenIdConnectConfiguration) {
     this.configuration = configuration
+    this.repository = new OpenIdConnectRepository(configuration)
   }
 
+  @Mutation
+  setRefreshTokenPromise (promise: Promise<any>) {
+    this.refreshTokenPromise = promise
+  }
+
+  // Actions
   @Action({})
   login () {
     const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
@@ -52,27 +69,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Action({})
   fetchTokens (authCode: string) {
-    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
-
-    const openIdConnectTokenUrl = `${this.configuration.baseUrl}/${this.configuration.tokenEndpoint}`
-
-    let body = {
-      code: authCode,
-      grant_type: 'authorization_code',
-      client_id: this.configuration.clientId,
-      client_secret: this.configuration.clientSecret,
-      redirect_uri: redirectUrl
-    }
-
-    return axios.post(
-      openIdConnectTokenUrl,
-      OpenIdUrlHelpers.buildFormUrlEncoded(body),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    ).then((result: any) => {
+    return this.repository.getTokens(authCode).then((result: any) => {
       const tokens = {
         accessToken: result['access_token'],
         refreshToken: result['refresh_token']
@@ -84,34 +81,28 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Action({})
   refreshTokens () {
-    const openIdConnectTokenUrl = `${this.configuration.baseUrl}/${this.configuration.tokenEndpoint}`
+    // Make sure refreshTokens isn't executed multiple times
+    if (!this.refreshTokenPromise) {
+      const promise = this.repository.refreshTokens(this.refreshToken)
+      this.context.commit('setRefreshTokenPromise', promise)
 
-    let body = {
-      grant_type: 'refresh_token',
-      client_id: this.configuration.clientId,
-      refresh_token: this.refreshToken
+      promise.then(
+        (result: any) => {
+          this.context.commit('refreshTokenPromise', null)
+          const tokens = {
+            accessToken: result['access_token'],
+            refreshToken: result['refresh_token']
+          }
+          this.context.commit('setTokens', tokens)
+          return tokens
+        },
+        (error) => {
+          this.context.commit('refreshTokenPromise', null)
+          this.context.commit('clearTokens')
+        }
+      )
     }
-
-    axios.post(
-      openIdConnectTokenUrl,
-      OpenIdUrlHelpers.buildFormUrlEncoded(body),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    ).then(
-      (result: any) => {
-        const tokens = {
-          accessToken: result['access_token'],
-          refreshToken: result['refresh_token']
-        }
-        this.context.commit('setTokens', tokens)
-      },
-      (error) => {
-        this.context.commit('clearTokens')
-      }
-    )
+    return this.refreshTokenPromise
   }
 
   @Action({})
@@ -127,5 +118,10 @@ export class OpenIdConnectModule extends VuexModule {
     }
     const openIdConnectUrl = baseOpenIdConnectUrl + '?' + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters)
     window.location.href = openIdConnectUrl
+  }
+
+  // Getters
+  get loggedIn (): boolean {
+    return !!this.accessToken
   }
 }
