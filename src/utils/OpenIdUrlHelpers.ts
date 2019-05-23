@@ -17,4 +17,18 @@ export class OpenIdUrlHelpers {
     }
     return parameterArray.join('&')
   }
+
+  public static buildFormUrlEncoded (object: object): string {
+    let bodyArray = []
+
+    for (let [key, value] of Object.entries(object)) {
+      if (key !== 'redirect_uri') {
+        value = encodeURIComponent(value)
+      }
+      if (value) {
+        bodyArray.push(key + '=' + value)
+      }
+    }
+    return bodyArray.join('&')
+  }
 }

@@ -37,8 +37,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Action({})
   login () {
-    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('auth/redirect')
-
+    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
     // Build openIdConnect url
     const baseOpenIdConnectUrl = `${this.configuration.baseUrl}/${this.configuration.authEndpoint}`
     const openIdParameters = {
@@ -53,7 +52,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Action({})
   fetchTokens (authCode: string) {
-    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('auth/redirect')
+    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
 
     const openIdConnectTokenUrl = `${this.configuration.baseUrl}/${this.configuration.tokenEndpoint}`
 
@@ -67,7 +66,7 @@ export class OpenIdConnectModule extends VuexModule {
 
     return axios.post(
       openIdConnectTokenUrl,
-      body,
+      OpenIdUrlHelpers.buildFormUrlEncoded(body),
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -95,7 +94,7 @@ export class OpenIdConnectModule extends VuexModule {
 
     axios.post(
       openIdConnectTokenUrl,
-      body,
+      OpenIdUrlHelpers.buildFormUrlEncoded(body),
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'

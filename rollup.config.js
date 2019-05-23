@@ -2,6 +2,8 @@ import typescript from 'rollup-plugin-typescript2'
 import pkg from './package.json'
 import vue from 'rollup-plugin-vue'
 import commonjs from 'rollup-plugin-commonjs'
+import alias from 'rollup-plugin-alias'
+
 export default {
   input: 'src/index.ts',
   output: [

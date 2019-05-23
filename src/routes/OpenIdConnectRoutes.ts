@@ -3,7 +3,7 @@ import { RouteConfig } from 'vue-router'
 
 export const openIdConnectRoutes: RouteConfig[] = [
   {
-    path: 'auth/redirect',
+    path: '/openid/redirect',
     name: 'openIdConnect',
     component: RedirectPage
   }
