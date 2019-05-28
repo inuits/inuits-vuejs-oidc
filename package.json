@@ -43,8 +43,5 @@
   "peerDependencies": {
     "vue": "^2.6.10"
   },
-  "types": "dist/index.d.ts",
-  "publishConfig": {
-    "registry": "https://nexus.inuits.io/repository/npm-private"
-  }
+  "types": "dist/index.d.ts"
 }
