@@ -3,6 +3,7 @@ import pkg from './package.json'
 import vue from 'rollup-plugin-vue'
 import commonjs from 'rollup-plugin-commonjs'
 import alias from 'rollup-plugin-alias'
+import { eslint } from 'rollup-plugin-eslint'
 
 export default {
   input: 'src/index.ts',
@@ -21,6 +22,7 @@ export default {
     ...Object.keys(pkg.peerDependencies || {})
   ],
   plugins: [
+    eslint(),
     commonjs(),
     vue(),
     typescript({
