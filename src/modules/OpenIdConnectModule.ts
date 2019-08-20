@@ -37,6 +37,7 @@ export class OpenIdConnectModule extends VuexModule {
   setTokens (tokens: OpenIdConnectTokens) {
     this.accessToken = tokens.accessToken
     this.refreshToken = tokens.refreshToken
+
     TokenStorageHelpers.setSessionTokens(tokens)
   }
 
@@ -76,8 +77,8 @@ export class OpenIdConnectModule extends VuexModule {
   fetchTokens (authCode: string) {
     return this.repository.getTokens(authCode).then((result: any) => {
       const tokens = {
-        accessToken: result['access_token'],
-        refreshToken: result['refresh_token']
+        accessToken: result.data['access_token'],
+        refreshToken: result.data['refresh_token']
       }
       this.context.commit('setTokens', tokens)
 
@@ -103,8 +104,8 @@ export class OpenIdConnectModule extends VuexModule {
         (result: any) => {
           this.context.commit('refreshTokenPromise', null)
           const tokens = {
-            accessToken: result['access_token'],
-            refreshToken: result['refresh_token']
+            accessToken: result.data['access_token'],
+            refreshToken: result.data['refresh_token']
           }
           this.context.commit('setTokens', tokens)
           return tokens

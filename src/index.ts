@@ -20,7 +20,7 @@ export function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (Vue: typeof _Vu
   // Add some auth guards to routes with specific meta tags
   options.router.beforeEach((to: any, from: any, next: any) => {
     if (to.matched.some((record: any) => record.meta.requiresOpenIdAuth)) {
-      if (!options.store.getters('openid/isLoggedIn')) {
+      if (!options.store.getters['openid/isLoggedIn']) {
         if (options.configuration.unauthorizedRedirectRoute) {
           next({
             path: '/login',
