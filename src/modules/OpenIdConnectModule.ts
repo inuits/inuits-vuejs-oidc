@@ -4,6 +4,7 @@ import { OpenIdConnectTokens } from '../interfaces/OpenIdConnectTokens'
 import axios from 'axios'
 import { OpenIdUrlHelpers } from '../utils/OpenIdUrlHelpers'
 import { TokenStorageHelpers } from '../utils/TokenStorageHelpers'
+import { RedirectRouteStorageHelpers } from '../utils/RedirectRouteStorageHelpers'
 import { OpenIdConnectRepository } from '../repositories/OpenIdConnectRepository'
 
 @Module({ namespaced: true, name: 'openid' })
@@ -17,8 +18,7 @@ export class OpenIdConnectModule extends VuexModule {
     authEndpoint: '',
     logoutEndpoint: '',
     clientId: '',
-    loginRedirectPath: '',
-    logoutRedirectPath: ''
+    authorizedRedirectRoute: ''
   }
 
   refreshTokenPromise?: Promise<any>
@@ -53,7 +53,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   // Actions
   @Action({})
-  login () {
+  login (finalRedirectRoute?: string) {
     const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
     // Build openIdConnect url
     const baseOpenIdConnectUrl = `${this.configuration.baseUrl}/${this.configuration.authEndpoint}`
@@ -64,6 +64,11 @@ export class OpenIdConnectModule extends VuexModule {
       redirect_uri: redirectUrl
     }
     const openIdConnectUrl = baseOpenIdConnectUrl + '?' + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters)
+
+    // Save final redirect route in session storage so it can be used at the end of the openid flow
+    if (finalRedirectRoute) {
+      RedirectRouteStorageHelpers.setRedirectRoute(finalRedirectRoute)
+    }
     window.location.href = openIdConnectUrl
   }
 
@@ -75,7 +80,15 @@ export class OpenIdConnectModule extends VuexModule {
         refreshToken: result['refresh_token']
       }
       this.context.commit('setTokens', tokens)
-      return this.configuration.loginRedirectPath
+
+      let redirectRoute = this.configuration.authorizedRedirectRoute
+
+      // Overwrite redirect route if available in session storage
+      const storedRedirectRoute = RedirectRouteStorageHelpers.getRedirectRoute()
+      if (storedRedirectRoute) {
+        redirectRoute = storedRedirectRoute
+      }
+      return redirectRoute
     })
   }
 
@@ -107,7 +120,13 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Action({})
   logout () {
-    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.logoutRedirectPath)
+    // Overwrite unauthorized redirect route if given
+    let redirectRoute = 'openIdConnectUnauthorizedRedirect'
+    if (this.configuration.unauthorizedRedirectRoute) {
+      redirectRoute = this.configuration.unauthorizedRedirectRoute
+    }
+
+    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(redirectRoute)
 
     // Build openIdConnect url
     const baseOpenIdConnectUrl = `${this.configuration.baseUrl}/${this.configuration.logoutEndpoint}`
@@ -121,7 +140,7 @@ export class OpenIdConnectModule extends VuexModule {
   }
 
   // Getters
-  get loggedIn (): boolean {
+  get isLoggedIn (): boolean {
     return !!this.accessToken
   }
 }

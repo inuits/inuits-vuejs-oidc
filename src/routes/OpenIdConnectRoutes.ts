@@ -1,10 +1,16 @@
-import RedirectPage from '../views/RedirectPage.vue'
+import TokenRedirectPage from '../views/TokenRedirectPage.vue'
+import UnauthorizedRedirectPage from '../views/UnauthorizedRedirectPage.vue'
 import { RouteConfig } from 'vue-router'
 
 export const openIdConnectRoutes: RouteConfig[] = [
   {
     path: '/openid/redirect',
-    name: 'openIdConnect',
-    component: RedirectPage
+    name: 'openIdConnectTokenRedirect',
+    component: TokenRedirectPage
+  },
+  {
+    path: '/openid/init',
+    name: 'openIdConnectUnauthorizedRedirect',
+    component: UnauthorizedRedirectPage
   }
 ]

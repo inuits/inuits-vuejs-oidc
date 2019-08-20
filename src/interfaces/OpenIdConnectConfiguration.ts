@@ -5,7 +5,8 @@ export interface OpenIdConnectConfiguration {
   logoutEndpoint: string,
   clientId: string,
   clientSecret?: string,
-  loginRedirectPath: string,
-  logoutRedirectPath: string,
-  scope?: string
+  scope?: string,
+  authorizedRedirectRoute: string,
+  // If not filled in then application will automatically redirect to openid provider
+  unauthorizedRedirectRoute?: string
 }
