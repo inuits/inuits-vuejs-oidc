@@ -136,6 +136,8 @@ export class OpenIdConnectModule extends VuexModule {
       client_id: this.configuration.clientId,
       redirect_uri: redirectUrl
     }
+
+    this.context.commit('clearTokens')
     const openIdConnectUrl = baseOpenIdConnectUrl + '?' + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters)
     window.location.href = openIdConnectUrl
   }
