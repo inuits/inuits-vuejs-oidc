@@ -122,7 +122,7 @@ export class OpenIdConnectModule extends VuexModule {
   @Action({})
   logout () {
     // Overwrite unauthorized redirect route if given
-    let redirectRoute = 'openIdConnectUnauthorizedRedirect'
+    let redirectRoute = 'openid/logout'
     if (this.configuration.unauthorizedRedirectRoute) {
       redirectRoute = this.configuration.unauthorizedRedirectRoute
     }

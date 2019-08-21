@@ -9,7 +9,7 @@ export const openIdConnectRoutes: RouteConfig[] = [
     component: TokenRedirectPage
   },
   {
-    path: '/openid/init',
+    path: '/openid/logout',
     name: 'openIdConnectUnauthorizedRedirect',
     component: UnauthorizedRedirectPage
   }
