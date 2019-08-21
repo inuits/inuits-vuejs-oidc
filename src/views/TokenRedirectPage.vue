@@ -14,7 +14,7 @@ export default class TokenRedirectPage extends Vue {
     const accessCode = this.$route.query.code
     this.$store.dispatch('openid/fetchTokens', accessCode).then(
       (redirectPath) => {
-        this.$router.push(redirectPath)
+        this.$router.push({ path: redirectPath })
       },
       (error) => {
         this.hasErrored = true
