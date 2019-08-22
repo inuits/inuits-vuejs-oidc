@@ -44,3 +44,4 @@ export function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (Vue: typeof _Vu
 
 export { OpenIdConnectPluginOptions } from './interfaces/OpenIdConnectPluginOptions'
 export { OpenIdConnectConfiguration } from './interfaces/OpenIdConnectConfiguration'
+export { OpenIdConnectInterceptors } from './interceptors/OpenIdConnectInterceptors'
