@@ -1,6 +1,6 @@
 {
   "name": "inuits-vuejs-oidc",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "scripts": {
     "watch": "rollup -c --watch",
     "build": "rollup -c"
