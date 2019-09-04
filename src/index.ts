@@ -28,6 +28,7 @@ export function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (Vue: typeof _Vu
           })
         } else {
           options.store.dispatch('openid/login', to.fullPath)
+          next()
         }
       } else {
         next()
@@ -36,10 +37,6 @@ export function OpenIdConnectPlugin<OpenIdConnectPluginOptions> (Vue: typeof _Vu
       next()
     }
   })
-
-  // Fix to make store and router available in redirect page component
-  // In future try to find a better solution
-  // Vue.prototype.$oidcRouter = options.router
 }
 
 export { OpenIdConnectPluginOptions } from './interfaces/OpenIdConnectPluginOptions'

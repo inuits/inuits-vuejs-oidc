@@ -42,6 +42,12 @@ export class OpenIdConnectModule extends VuexModule {
   }
 
   @Mutation
+  loadSessionTokens (tokens: OpenIdConnectTokens) {
+    this.accessToken = TokenStorageHelpers.getSessionAccessToken()
+    this.refreshToken = TokenStorageHelpers.getSessionRefreshToken()
+  }
+
+  @Mutation
   initializeConfig (configuration: OpenIdConnectConfiguration) {
     this.configuration = configuration
     this.repository = new OpenIdConnectRepository(configuration)
@@ -55,6 +61,11 @@ export class OpenIdConnectModule extends VuexModule {
   // Actions
   @Action({})
   login (finalRedirectRoute?: string) {
+    // First check if there are still tokens in sessionStorage
+    this.context.commit('loadSessionTokens')
+    if (this.accessToken) {
+      return true
+    }
     const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
     // Build openIdConnect url
     const baseOpenIdConnectUrl = `${this.configuration.baseUrl}/${this.configuration.authEndpoint}`
