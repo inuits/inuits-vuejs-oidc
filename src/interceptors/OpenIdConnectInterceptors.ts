@@ -4,7 +4,7 @@ import { Store } from 'vuex'
 export class OpenIdConnectInterceptors {
   public static buildRequestTokenInterceptorCallback (store: Store<any>) {
     return function (config: AxiosRequestConfig) {
-      config.headers.common['Authorization'] = `Bearer ${store.state.accessToken}`
+      config.headers.common['Authorization'] = `Bearer ${store.state.openid.accessToken}`
       return config
     }
   }

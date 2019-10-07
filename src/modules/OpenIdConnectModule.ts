@@ -113,7 +113,7 @@ export class OpenIdConnectModule extends VuexModule {
 
       promise.then(
         (result: any) => {
-          this.context.commit('refreshTokenPromise', null)
+          this.context.commit('setRefreshTokenPromise', null)
           const tokens = {
             accessToken: result.data['access_token'],
             refreshToken: result.data['refresh_token']
@@ -122,8 +122,9 @@ export class OpenIdConnectModule extends VuexModule {
           return tokens
         },
         (error) => {
-          this.context.commit('refreshTokenPromise', null)
+          this.context.commit('setRefreshTokenPromise', null)
           this.context.commit('clearTokens')
+          this.context.dispatch('login')
         }
       )
     }
