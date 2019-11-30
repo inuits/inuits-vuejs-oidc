@@ -9,26 +9,37 @@ export class OpenIdConnectInterceptors {
     }
   }
 
-  public static buildResponseErrorInterceptorCallback (store: Store<any>, retryAxiosInstance?: any) {
-    return async function (error: any) {
-      // Only intercept 401 unauthorized calls
-      if (error.response && error.response.status && error.response.status === 401) {
-        try {
-          // Refresh tokens and retry call
-          const newTokens = await store.dispatch('openid/refreshTokens')
-          error.config.headers.common['Authorization'] = `Bearer ${newTokens.accessToken}`
-
+  public static async buildResponseErrorInterceptorCallback (errorVm: any, store: Store<any>, retryAxiosInstance?: any) {
+    // Only intercept 401 unauthorized calls
+    if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
+      try {
+        // Refresh tokens and retry call
+        return store.dispatch('openid/refreshTokens').then((newTokens: any) => {
+          errorVm.response.config.headers.Authorization = `Bearer ${newTokens.accessToken}`
           // Use custom retryAxiosInstance if given
           if (retryAxiosInstance) {
-            return retryAxiosInstance.request(error.config)
+            return new Promise((resolve, reject) => {
+              retryAxiosInstance.request(errorVm.response.config).then((response : any) => {
+                resolve(response)
+              }).catch((error: any) => {
+                reject(error)
+              })
+            })
           } else {
-            return axios.request(error.config)
+            return new Promise((resolve, reject) => {
+              axios.request(errorVm.response.config).then(response => {
+                resolve(response)
+              }).catch((error) => {
+                reject(error)
+              })
+            })
           }
-        } catch (e) {
-          throw error
-        }
+        })
+      } catch (e) {
+        throw errorVm
       }
-      throw error
     }
+    throw errorVm
+    // }
   }
 }

@@ -111,7 +111,7 @@ export class OpenIdConnectModule extends VuexModule {
       const promise = this.repository.refreshTokens(this.refreshToken)
       this.context.commit('setRefreshTokenPromise', promise)
 
-      promise.then(
+      return promise.then(
         (result: any) => {
           this.context.commit('setRefreshTokenPromise', null)
           const tokens = {
