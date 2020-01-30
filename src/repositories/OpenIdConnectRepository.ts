@@ -12,6 +12,14 @@ export class OpenIdConnectRepository {
   getTokens (authCode: string): Promise<any> {
     const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
 
+    if (this.configuration.serverBaseUrl) {
+      return this.getTokensFromServer(authCode, redirectUrl)
+    } else {
+      return this.getTokensFromProvider(authCode, redirectUrl)
+    }
+  }
+
+  getTokensFromProvider (authCode: string, redirectUrl: string): Promise<any> {
     const openIdConnectTokenUrl = `${this.configuration.baseUrl}/${this.configuration.tokenEndpoint}`
 
     let body = {
@@ -33,7 +41,31 @@ export class OpenIdConnectRepository {
     )
   }
 
+  getTokensFromServer (authCode: string, redirectUrl: string): Promise<any> {
+    const serverTokenUrl = `${this.configuration.serverBaseUrl}/${this.configuration.serverTokenEndpoint}`
+
+    let body = {
+      authCode: authCode,
+      realm: this.configuration.baseUrl,
+      clientId: this.configuration.clientId,
+      redirectUri: redirectUrl
+    }
+
+    return axios.post(
+      serverTokenUrl,
+      body
+    )
+  }
+
   refreshTokens (refreshToken: string): Promise<any> {
+    if (this.configuration.serverBaseUrl) {
+      return this.refreshTokensFromServer(refreshToken)
+    } else {
+      return this.refreshTokensFromProvider(refreshToken)
+    }
+  }
+
+  refreshTokensFromProvider (refreshToken: string): Promise<any> {
     const openIdConnectTokenUrl = `${this.configuration.baseUrl}/${this.configuration.tokenEndpoint}`
 
     let body = {
@@ -50,6 +82,21 @@ export class OpenIdConnectRepository {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }
+    )
+  }
+
+  refreshTokensFromServer (refreshToken: string): Promise<any> {
+    const serverRefreshUrl = `${this.configuration.serverBaseUrl}/${this.configuration.serverRefreshEndpoint}`
+
+    let body = {
+      realm: this.configuration.baseUrl,
+      clientId: this.configuration.clientId,
+      refreshToken: refreshToken
+    }
+
+    return axios.post(
+      serverRefreshUrl,
+      body
     )
   }
 }

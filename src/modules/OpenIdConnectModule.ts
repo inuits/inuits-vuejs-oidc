@@ -49,6 +49,12 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Mutation
   initializeConfig (configuration: OpenIdConnectConfiguration) {
+    // Make sure that if serverBaseUrl is defined, we also have it's related endpoints
+    if (configuration.serverBaseUrl) {
+      if (!configuration.serverTokenEndpoint || !configuration.serverRefreshEndpoint) {
+        throw new Error('Configuration contains a serverBaseUrl but not all of the required server endpoints')
+      }
+    }
     this.configuration = configuration
     this.repository = new OpenIdConnectRepository(configuration)
   }
