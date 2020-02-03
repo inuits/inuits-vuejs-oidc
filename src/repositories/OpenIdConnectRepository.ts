@@ -10,16 +10,15 @@ export class OpenIdConnectRepository {
   }
 
   getTokens (authCode: string): Promise<any> {
-    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
-
     if (this.configuration.serverBaseUrl) {
-      return this.getTokensFromServer(authCode, redirectUrl)
+      return this.getTokensFromServer(authCode)
     } else {
-      return this.getTokensFromProvider(authCode, redirectUrl)
+      return this.getTokensFromProvider(authCode)
     }
   }
 
-  getTokensFromProvider (authCode: string, redirectUrl: string): Promise<any> {
+  getTokensFromProvider (authCode: string): Promise<any> {
+    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
     const openIdConnectTokenUrl = `${this.configuration.baseUrl}/${this.configuration.tokenEndpoint}`
 
     let body = {
@@ -41,7 +40,8 @@ export class OpenIdConnectRepository {
     )
   }
 
-  getTokensFromServer (authCode: string, redirectUrl: string): Promise<any> {
+  getTokensFromServer (authCode: string): Promise<any> {
+    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect', false)
     const serverTokenUrl = `${this.configuration.serverBaseUrl}/${this.configuration.serverTokenEndpoint}`
 
     let body = {

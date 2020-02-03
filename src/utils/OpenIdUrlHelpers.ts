@@ -1,11 +1,16 @@
 export class OpenIdUrlHelpers {
-  public static buildInternalRedirectUrl (endpoint: string): string {
+  public static buildInternalRedirectUrl (endpoint: string, encoded = true): string {
     let port = ''
     if (location.port) {
       port = ':' + location.port
     }
     const redirectBaseUrl = location.protocol + '//' + location.hostname + port
-    return encodeURIComponent(redirectBaseUrl + '/' + endpoint)
+
+    if (encoded) {
+      return encodeURIComponent(redirectBaseUrl + '/' + endpoint)
+    } else {
+      return redirectBaseUrl + '/' + endpoint
+    }
   }
 
   public static buildOpenIdParameterString (parameters: object): string {
