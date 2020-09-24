@@ -41,7 +41,7 @@ export class OpenIdConnectRepository {
   }
 
   getTokensFromServer (authCode: string): Promise<any> {
-    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect', false)
+    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.InternalRedirectUrl, false)
     const serverTokenUrl = `${this.configuration.serverBaseUrl}/${this.configuration.serverTokenEndpoint}`
 
     let body = {

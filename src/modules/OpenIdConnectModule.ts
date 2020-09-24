@@ -18,7 +18,8 @@ export class OpenIdConnectModule extends VuexModule {
     authEndpoint: '',
     logoutEndpoint: '',
     clientId: '',
-    authorizedRedirectRoute: ''
+    authorizedRedirectRoute: '',
+    InternalRedirectUrl: 'openid/redirect'
   }
 
   refreshTokenPromise?: Promise<any>
@@ -49,6 +50,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Mutation
   initializeConfig (configuration: OpenIdConnectConfiguration) {
+    console.log('initializeConfig')
     // Make sure that if serverBaseUrl is defined, we also have it's related endpoints
     if (configuration.serverBaseUrl) {
       if (!configuration.serverTokenEndpoint || !configuration.serverRefreshEndpoint) {
@@ -67,12 +69,14 @@ export class OpenIdConnectModule extends VuexModule {
   // Actions
   @Action({})
   login (finalRedirectRoute?: string) {
+    console.log('login')
     // First check if there are still tokens in sessionStorage
     this.context.commit('loadSessionTokens')
     if (this.accessToken) {
       return true
     }
-    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
+    console.log(this.configuration.InternalRedirectUrl)
+    const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.InternalRedirectUrl)
     // Build openIdConnect url
     const baseOpenIdConnectUrl = `${this.configuration.baseUrl}/${this.configuration.authEndpoint}`
     const openIdParameters = {
@@ -92,6 +96,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Action({})
   fetchTokens (authCode: string) {
+    console.log('fetchtokens')
     return this.repository.getTokens(authCode).then((result: any) => {
       const tokens = {
         accessToken: result.data['access_token'],
@@ -113,6 +118,7 @@ export class OpenIdConnectModule extends VuexModule {
   @Action({})
   refreshTokens () {
     // Make sure refreshTokens isn't executed multiple times
+    console.log('refreshTokens')
     if (!this.refreshTokenPromise) {
       const promise = this.repository.refreshTokens(this.refreshToken)
       this.context.commit('setRefreshTokenPromise', promise)
@@ -139,6 +145,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Action({})
   logout () {
+    console.log('logout')
     // Overwrite unauthorized redirect route if given
     let redirectRoute = 'openid/logout'
     if (this.configuration.unauthorizedRedirectRoute) {

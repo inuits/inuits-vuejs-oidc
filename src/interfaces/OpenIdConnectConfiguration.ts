@@ -13,4 +13,5 @@ export interface OpenIdConnectConfiguration {
   serverBaseUrl?: string;
   serverTokenEndpoint?: string;
   serverRefreshEndpoint?: string;
+  InternalRedirectUrl?: string;
 }
