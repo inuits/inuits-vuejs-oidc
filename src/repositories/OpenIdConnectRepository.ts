@@ -21,7 +21,7 @@ export class OpenIdConnectRepository {
     const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect')
     const openIdConnectTokenUrl = `${this.configuration.baseUrl}/${this.configuration.tokenEndpoint}`
 
-    let body = {
+    const body = {
       code: authCode,
       grant_type: 'authorization_code',
       client_id: this.configuration.clientId,
@@ -44,7 +44,7 @@ export class OpenIdConnectRepository {
     const redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.InternalRedirectUrl, false)
     const serverTokenUrl = `${this.configuration.serverBaseUrl}/${this.configuration.serverTokenEndpoint}`
 
-    let body = {
+    const body = {
       authCode: authCode,
       realm: this.configuration.baseUrl,
       clientId: this.configuration.clientId,
@@ -68,7 +68,7 @@ export class OpenIdConnectRepository {
   refreshTokensFromProvider (refreshToken: string): Promise<any> {
     const openIdConnectTokenUrl = `${this.configuration.baseUrl}/${this.configuration.tokenEndpoint}`
 
-    let body = {
+    const body = {
       grant_type: 'refresh_token',
       client_id: this.configuration.clientId,
       refresh_token: refreshToken
@@ -88,7 +88,7 @@ export class OpenIdConnectRepository {
   refreshTokensFromServer (refreshToken: string): Promise<any> {
     const serverRefreshUrl = `${this.configuration.serverBaseUrl}/${this.configuration.serverRefreshEndpoint}`
 
-    let body = {
+    const body = {
       realm: this.configuration.baseUrl,
       clientId: this.configuration.clientId,
       refreshToken: refreshToken

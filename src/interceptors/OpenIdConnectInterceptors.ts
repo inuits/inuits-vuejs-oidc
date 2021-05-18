@@ -4,7 +4,8 @@ import { Store } from 'vuex'
 export class OpenIdConnectInterceptors {
   public static buildRequestTokenInterceptorCallback (store: Store<any>) {
     return function (config: AxiosRequestConfig) {
-      config.headers.common['Authorization'] = `Bearer ${store.state.openid.accessToken}`
+      const authorization = 'Authorization'
+      config.headers.common[authorization] = `Bearer ${store.getters.accessToken}`
       return config
     }
   }
@@ -14,7 +15,7 @@ export class OpenIdConnectInterceptors {
     if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
       try {
         // Refresh tokens and retry call
-        return store.dispatch('openid/refreshTokens').then((newTokens: any) => {
+        return store.dispatch('refreshTokens').then((newTokens: any) => {
           errorVm.response.config.headers.Authorization = `Bearer ${newTokens.accessToken}`
           // Use custom retryAxiosInstance if given
           if (retryAxiosInstance) {

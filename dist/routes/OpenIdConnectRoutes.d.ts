@@ -1,2 +1,1 @@
-import { RouteConfig } from 'vue-router';
-export declare const openIdConnectRoutes: RouteConfig[];
+export declare const openIdConnectRoutes: any[];

@@ -13,18 +13,22 @@ export class OpenIdUrlHelpers {
     }
   }
 
-  public static buildOpenIdParameterString (parameters: object): string {
-    let parameterArray = []
-    for (let [key, param] of Object.entries(parameters)) {
+  public static buildOpenIdParameterString (parameters: object, encodeRedirectUrl: boolean): string {
+    const parameterArray = []
+    for (const [key, param] of Object.entries(parameters)) {
       if (param) {
         parameterArray.push(key + '=' + param)
       }
     }
-    return parameterArray.join('&')
+    let openIdParameterString = '?' + parameterArray.join('&')
+    if (encodeRedirectUrl) {
+      openIdParameterString = encodeURIComponent(openIdParameterString)
+    }
+    return openIdParameterString
   }
 
   public static buildFormUrlEncoded (object: object): string {
-    let bodyArray = []
+    const bodyArray = []
 
     for (let [key, value] of Object.entries(object)) {
       if (key !== 'redirect_uri') {
@@ -35,5 +39,14 @@ export class OpenIdUrlHelpers {
       }
     }
     return bodyArray.join('&')
+  }
+
+  public static buildAuthEnpointWithReturnUrlEncoded (authEnpoint: string, encodeRedirectUrl: boolean): string {
+    let authEnpointWithReturnUrlEncoded = authEnpoint
+    if (encodeRedirectUrl) {
+      const returnUrl = authEnpoint.split('ReturnUrl=')
+      authEnpointWithReturnUrlEncoded = returnUrl[0] + 'ReturnUrl=' + encodeURIComponent(returnUrl[1])
+    }
+    return authEnpointWithReturnUrlEncoded
   }
 }

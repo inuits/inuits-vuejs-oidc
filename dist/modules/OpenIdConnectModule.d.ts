@@ -2,6 +2,10 @@ import { VuexModule } from 'vuex-module-decorators';
 import { OpenIdConnectConfiguration } from '../interfaces/OpenIdConnectConfiguration';
 import { OpenIdConnectTokens } from '../interfaces/OpenIdConnectTokens';
 import { OpenIdConnectRepository } from '../repositories/OpenIdConnectRepository';
+export declare enum Tokens {
+    AccessToken = "access_token",
+    RefreshToken = "refresh_token"
+}
 export declare class OpenIdConnectModule extends VuexModule {
     accessToken: string;
     refreshToken: string;
@@ -17,5 +21,5 @@ export declare class OpenIdConnectModule extends VuexModule {
     fetchTokens(authCode: string): Promise<string>;
     refreshTokens(): Promise<any>;
     logout(): void;
-    readonly isLoggedIn: boolean;
+    get isLoggedIn(): boolean;
 }

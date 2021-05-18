@@ -3,15 +3,21 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import { defineComponent } from 'vue'
+import { useStore } from 'vuex'
 
-@Component
-export default class UnauthorizedRedirectPage extends Vue {
-  hasErrored = false
+export default defineComponent({
 
-  mounted () {
-    this.$store.dispatch('openid/login')
+  name: 'UnauthorizedRedirectPage',
+  props: {
+    hasErrored: {
+      type: Boolean,
+      default: false
+    }
+  },
+  setup (props, context) {
+    const store = useStore()
+    store.dispatch('openid/login')
   }
-}
+})
 </script>

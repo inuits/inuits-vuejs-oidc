@@ -2,7 +2,6 @@ import typescript from 'rollup-plugin-typescript2'
 import pkg from './package.json'
 import vue from 'rollup-plugin-vue'
 import commonjs from 'rollup-plugin-commonjs'
-import alias from 'rollup-plugin-alias'
 import { eslint } from 'rollup-plugin-eslint'
 
 export default {
@@ -23,8 +22,8 @@ export default {
   ],
   plugins: [
     eslint(),
-    commonjs(),
     vue(),
+    commonjs(),
     typescript({
       typescript: require('typescript'),
       defaultLang: { script: 'ts' },

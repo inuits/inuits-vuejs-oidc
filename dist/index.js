@@ -2,54 +2,445 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+var axios = require('axios');
+var vue = require('vue');
+var vuex = require('vuex');
+var vueRouter = require('vue-router');
 
-var vuexModuleDecorators = require('vuex-module-decorators');
-var axios = _interopDefault(require('axios'));
-var Vue = _interopDefault(require('vue'));
-var Component = _interopDefault(require('vue-class-component'));
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation. All rights reserved.
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-this file except in compliance with the License. You may obtain a copy of the
-License at http://www.apache.org/licenses/LICENSE-2.0
+var axios__default = /*#__PURE__*/_interopDefaultLegacy(axios);
 
-THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-MERCHANTABLITY OR NON-INFRINGEMENT.
+var OpenIdUrlHelpers = /** @class */ (function () {
+    function OpenIdUrlHelpers() {
+    }
+    OpenIdUrlHelpers.buildInternalRedirectUrl = function (endpoint, encoded) {
+        if (encoded === void 0) { encoded = true; }
+        var port = '';
+        if (location.port) {
+            port = ':' + location.port;
+        }
+        var redirectBaseUrl = location.protocol + '//' + location.hostname + port;
+        if (encoded) {
+            return encodeURIComponent(redirectBaseUrl + '/' + endpoint);
+        }
+        else {
+            return redirectBaseUrl + '/' + endpoint;
+        }
+    };
+    OpenIdUrlHelpers.buildOpenIdParameterString = function (parameters, encodeRedirectUrl) {
+        var parameterArray = [];
+        for (var _i = 0, _a = Object.entries(parameters); _i < _a.length; _i++) {
+            var _b = _a[_i], key = _b[0], param = _b[1];
+            if (param) {
+                parameterArray.push(key + '=' + param);
+            }
+        }
+        var openIdParameterString = '?' + parameterArray.join('&');
+        if (encodeRedirectUrl) {
+            openIdParameterString = encodeURIComponent(openIdParameterString);
+        }
+        return openIdParameterString;
+    };
+    OpenIdUrlHelpers.buildFormUrlEncoded = function (object) {
+        var bodyArray = [];
+        for (var _i = 0, _a = Object.entries(object); _i < _a.length; _i++) {
+            var _b = _a[_i], key = _b[0], value = _b[1];
+            if (key !== 'redirect_uri') {
+                value = encodeURIComponent(value);
+            }
+            if (value) {
+                bodyArray.push(key + '=' + value);
+            }
+        }
+        return bodyArray.join('&');
+    };
+    OpenIdUrlHelpers.buildAuthEnpointWithReturnUrlEncoded = function (authEnpoint, encodeRedirectUrl) {
+        var authEnpointWithReturnUrlEncoded = authEnpoint;
+        if (encodeRedirectUrl) {
+            var returnUrl = authEnpoint.split('ReturnUrl=');
+            authEnpointWithReturnUrlEncoded = returnUrl[0] + 'ReturnUrl=' + encodeURIComponent(returnUrl[1]);
+        }
+        return authEnpointWithReturnUrlEncoded;
+    };
+    return OpenIdUrlHelpers;
+}());
 
-See the Apache Version 2.0 License for specific language governing permissions
-and limitations under the License.
-***************************************************************************** */
-/* global Reflect, Promise */
+var OpenIdConnectRepository = /** @class */ (function () {
+    function OpenIdConnectRepository(configuration) {
+        this.configuration = configuration;
+    }
+    OpenIdConnectRepository.prototype.getTokens = function (authCode) {
+        if (this.configuration.serverBaseUrl) {
+            return this.getTokensFromServer(authCode);
+        }
+        else {
+            return this.getTokensFromProvider(authCode);
+        }
+    };
+    OpenIdConnectRepository.prototype.getTokensFromProvider = function (authCode) {
+        var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect');
+        var openIdConnectTokenUrl = this.configuration.baseUrl + "/" + this.configuration.tokenEndpoint;
+        var body = {
+            code: authCode,
+            grant_type: 'authorization_code',
+            client_id: this.configuration.clientId,
+            client_secret: this.configuration.clientSecret,
+            redirect_uri: redirectUrl
+        };
+        return axios__default['default'].post(openIdConnectTokenUrl, OpenIdUrlHelpers.buildFormUrlEncoded(body), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+    };
+    OpenIdConnectRepository.prototype.getTokensFromServer = function (authCode) {
+        var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.InternalRedirectUrl, false);
+        var serverTokenUrl = this.configuration.serverBaseUrl + "/" + this.configuration.serverTokenEndpoint;
+        var body = {
+            authCode: authCode,
+            realm: this.configuration.baseUrl,
+            clientId: this.configuration.clientId,
+            redirectUri: redirectUrl
+        };
+        return axios__default['default'].post(serverTokenUrl, body);
+    };
+    OpenIdConnectRepository.prototype.refreshTokens = function (refreshToken) {
+        if (this.configuration.serverBaseUrl) {
+            return this.refreshTokensFromServer(refreshToken);
+        }
+        else {
+            return this.refreshTokensFromProvider(refreshToken);
+        }
+    };
+    OpenIdConnectRepository.prototype.refreshTokensFromProvider = function (refreshToken) {
+        var openIdConnectTokenUrl = this.configuration.baseUrl + "/" + this.configuration.tokenEndpoint;
+        var body = {
+            grant_type: 'refresh_token',
+            client_id: this.configuration.clientId,
+            refresh_token: refreshToken
+        };
+        return axios__default['default'].post(openIdConnectTokenUrl, OpenIdUrlHelpers.buildFormUrlEncoded(body), {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+    };
+    OpenIdConnectRepository.prototype.refreshTokensFromServer = function (refreshToken) {
+        var serverRefreshUrl = this.configuration.serverBaseUrl + "/" + this.configuration.serverRefreshEndpoint;
+        var body = {
+            realm: this.configuration.baseUrl,
+            clientId: this.configuration.clientId,
+            refreshToken: refreshToken
+        };
+        return axios__default['default'].post(serverRefreshUrl, body);
+    };
+    return OpenIdConnectRepository;
+}());
 
-var extendStatics = function(d, b) {
-    extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return extendStatics(d, b);
+var loginRedirectRouteKey = 'oidc-login-redirect-route';
+var RedirectRouteStorageHelpers = /** @class */ (function () {
+    function RedirectRouteStorageHelpers() {
+    }
+    RedirectRouteStorageHelpers.setRedirectRoute = function (route) {
+        sessionStorage.setItem(loginRedirectRouteKey, route);
+    };
+    RedirectRouteStorageHelpers.getRedirectRoute = function () {
+        var redirectRoute = sessionStorage.getItem(loginRedirectRouteKey) ? sessionStorage.getItem(loginRedirectRouteKey) : '';
+        sessionStorage.removeItem(loginRedirectRouteKey);
+        return redirectRoute;
+    };
+    return RedirectRouteStorageHelpers;
+}());
+
+var accessTokenKey = 'oidc-access-token';
+var refreshTokenKey = 'oidc-refresh-token';
+var TokenStorageHelpers = /** @class */ (function () {
+    function TokenStorageHelpers() {
+    }
+    TokenStorageHelpers.getSessionAccessToken = function () {
+        return sessionStorage.getItem(accessTokenKey) ? sessionStorage.getItem(accessTokenKey) : '';
+    };
+    TokenStorageHelpers.getSessionRefreshToken = function () {
+        return sessionStorage.getItem(refreshTokenKey) ? sessionStorage.getItem(refreshTokenKey) : '';
+    };
+    TokenStorageHelpers.setSessionTokens = function (tokens) {
+        sessionStorage.setItem(accessTokenKey, tokens.accessToken);
+        sessionStorage.setItem(refreshTokenKey, tokens.refreshToken);
+    };
+    TokenStorageHelpers.clearSessionTokens = function () {
+        sessionStorage.removeItem(accessTokenKey);
+        sessionStorage.removeItem(refreshTokenKey);
+    };
+    return TokenStorageHelpers;
+}());
+
+var configuration = {
+    baseUrl: '',
+    tokenEndpoint: '',
+    authEndpoint: '',
+    logoutEndpoint: '',
+    clientId: '',
+    authorizedRedirectRoute: '',
+    InternalRedirectUrl: 'openid/redirect',
+    encodeRedirectUrl: false
+};
+var Tokens;
+(function (Tokens) {
+    Tokens["AccessToken"] = "access_token";
+    Tokens["RefreshToken"] = "refresh_token";
+})(Tokens || (Tokens = {}));
+var OpenIdConnectModule = {
+    state: function () { return ({
+        openid: {
+            accessToken: TokenStorageHelpers.getSessionAccessToken(),
+            refreshToken: TokenStorageHelpers.getSessionRefreshToken(),
+            configuration: configuration,
+            refreshTokenPromise: Promise,
+            repository: new OpenIdConnectRepository(configuration)
+        }
+    }); },
+    mutations: {
+        CLEAR_TOKENS: function (state) {
+            state.openid.accessToken = '';
+            state.openid.refreshToken = '';
+            TokenStorageHelpers.clearSessionTokens();
+        },
+        SET_TOKENS: function (state, tokens) {
+            state.openid.accessToken = tokens.accessToken;
+            state.openid.refreshToken = tokens.refreshToken;
+            TokenStorageHelpers.setSessionTokens(tokens);
+        },
+        LOAD_SESSION_TOKENS: function (state) {
+            state.openid.accessToken = TokenStorageHelpers.getSessionAccessToken();
+            state.openid.refreshToken = TokenStorageHelpers.getSessionRefreshToken();
+        },
+        INITIALIZE_CONFIG: function (state, configuration) {
+            // Make sure that if serverBaseUrl is defined, we also have it's related endpoints
+            if (configuration.serverBaseUrl) {
+                if (!configuration.serverTokenEndpoint || !configuration.serverRefreshEndpoint) {
+                    throw new Error('Configuration contains a serverBaseUrl but not all of the required server endpoints');
+                }
+            }
+            if (!configuration.InternalRedirectUrl) {
+                configuration.InternalRedirectUrl = 'openid/redirect';
+            }
+            state.openid.configuration = configuration;
+            state.openid.repository = new OpenIdConnectRepository(configuration);
+        },
+        SET_REFRESH_TOKEN_PROMISE: function (state, promise) {
+            state.openid.refreshTokenPromise = promise;
+        }
+    },
+    actions: {
+        clearTokens: function (_a, data) {
+            var commit = _a.commit;
+            commit('CLEAR_TOKENS', data);
+        },
+        setTokens: function (_a, data) {
+            var commit = _a.commit;
+            commit('SET_TOKENS', data);
+        },
+        loadSessionTokens: function (_a, data) {
+            var commit = _a.commit;
+            commit('LOAD_SESSION_TOKENS', data);
+        },
+        initializeConfig: function (_a, data) {
+            var commit = _a.commit;
+            commit('INITIALIZE_CONFIG', data);
+        },
+        setRefreshTokenPromise: function (_a, data) {
+            var commit = _a.commit;
+            commit('INITIALIZE_CONFIG', data);
+        },
+        login: function (_a, finalRedirectRoute) {
+            var commit = _a.commit, state = _a.state;
+            // First check if there are still tokens in sessionStorage
+            commit('LOAD_SESSION_TOKENS');
+            if (state.openid.accessToken) {
+                return true;
+            }
+            var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(state.openid.configuration.InternalRedirectUrl, !state.openid.configuration.encodeRedirectUrl);
+            // Build openIdConnect url
+            var authEndpoint = OpenIdUrlHelpers.buildAuthEnpointWithReturnUrlEncoded(state.openid.configuration.authEndpoint, state.openid.configuration.encodeRedirectUrl);
+            var baseOpenIdConnectUrl = state.openid.configuration.baseUrl + "/" + authEndpoint;
+            var openIdParameters = {
+                scope: state.openid.configuration.scope ? state.openid.configuration.scope : 'openid',
+                client_id: state.openid.configuration.clientId,
+                response_type: 'code',
+                redirect_uri: redirectUrl
+            };
+            var openIdConnectUrl = baseOpenIdConnectUrl + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters, state.openid.configuration.encodeRedirectUrl);
+            // Save final redirect route in session storage so it can be used at the end of the openid flow
+            if (finalRedirectRoute) {
+                RedirectRouteStorageHelpers.setRedirectRoute(finalRedirectRoute);
+            }
+            window.location.href = openIdConnectUrl;
+        },
+        fetchTokens: function (_a, authCode) {
+            var dispatch = _a.dispatch, state = _a.state;
+            return state.openid.repository.getTokens(authCode).then(function (result) {
+                var tokens = {
+                    accessToken: result.data[Tokens.AccessToken],
+                    refreshToken: result.data[Tokens.RefreshToken]
+                };
+                dispatch('setTokens', tokens);
+                var redirectRoute = state.openid.configuration.authorizedRedirectRoute;
+                // Overwrite redirect route if available in session storage
+                var storedRedirectRoute = RedirectRouteStorageHelpers.getRedirectRoute();
+                if (storedRedirectRoute) {
+                    redirectRoute = storedRedirectRoute;
+                }
+                return redirectRoute;
+            });
+        },
+        refreshTokens: function (_a) {
+            var dispatch = _a.dispatch, store = _a.store;
+            if (!store.openid.refreshTokenPromise) {
+                var promise = store.openid.repository.refreshTokens(store.openid.refreshToken);
+                dispatch('setRefreshTokenPromise', promise);
+                return promise.then(function (result) {
+                    dispatch('setRefreshTokenPromise', null);
+                    var tokens = {
+                        accessToken: result.data[Tokens.AccessToken],
+                        refreshToken: result.data[Tokens.RefreshToken]
+                    };
+                    dispatch('setTokens', tokens);
+                    return tokens;
+                }, function (error) {
+                    dispatch('setRefreshTokenPromise', null);
+                    dispatch('clearTokens');
+                    dispatch('login');
+                });
+            }
+            return store.openid.refreshTokenPromise;
+        },
+        logout: function (_a, data) {
+            var commit = _a.commit, state = _a.state;
+            // Overwrite unauthorized redirect route if given
+            var redirectRoute = 'openid/logout';
+            if (state.openid.configuration.unauthorizedRedirectRoute) {
+                redirectRoute = state.openid.configuration.unauthorizedRedirectRoute;
+            }
+            var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(redirectRoute);
+            // Build openIdConnect url
+            var baseOpenIdConnectUrl = state.openid.configuration.baseUrl + "/" + state.openid.configuration.logoutEndpoint;
+            var openIdParameters = {
+                scope: state.openid.configuration.scope ? state.openid.configuration.scope : 'openid',
+                client_id: state.openid.configuration.clientId,
+                redirect_uri: redirectUrl
+            };
+            commit('clearTokens');
+            var openIdConnectUrl = baseOpenIdConnectUrl + '?' + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters, state.openid.configuration.encodeRedirectUrl);
+            window.location.href = openIdConnectUrl;
+        }
+    },
+    getters: {
+        isLoggedIn: function (state) {
+            return !!state.openid.accessToken;
+        },
+        accessToken: function (state) {
+            return state.openid.accessToken;
+        }
+    }
 };
 
-function __extends(d, b) {
-    extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+var script$1 = vue.defineComponent({
+    name: 'UnauthorizedRedirectPage',
+    props: {
+        hasErrored: {
+            type: Boolean,
+            default: false
+        }
+    },
+    setup: function () {
+        var store = vuex.useStore();
+        var route = vueRouter.useRoute();
+        var router = vueRouter.useRouter();
+        var hasError = vue.ref(false);
+        var accessCode = route.query.code;
+        store.dispatch('fetchTokens', accessCode).then(function (redirectPath) {
+            router.push({ path: redirectPath });
+        }, function (error) {
+            hasError.value = true;
+        });
+        return {
+            hasError: hasError
+        };
+    }
+});
+
+const _hoisted_1$1 = { key: 0 };
+
+function render$1(_ctx, _cache, $props, $setup, $data, $options) {
+  return (_ctx.hasError)
+    ? (vue.openBlock(), vue.createBlock("div", _hoisted_1$1, " Something went wrong during openIdConnect login. "))
+    : vue.createCommentVNode("v-if", true)
 }
 
-function __decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
+script$1.render = render$1;
+script$1.__file = "src/views/TokenRedirectPage.vue";
+
+var script = vue.defineComponent({
+    name: 'UnauthorizedRedirectPage',
+    props: {
+        hasErrored: {
+            type: Boolean,
+            default: false
+        }
+    },
+    setup: function (props, context) {
+        var store = vuex.useStore();
+        store.dispatch('openid/login');
+    }
+});
+
+const _hoisted_1 = { key: 0 };
+
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (_ctx.hasErrored)
+    ? (vue.openBlock(), vue.createBlock("div", _hoisted_1, "Something went wrong during openIdConnect redirect."))
+    : vue.createCommentVNode("v-if", true)
 }
+
+script.render = render;
+script.__file = "src/views/UnauthorizedRedirectPage.vue";
+
+// import { RouteConfig } from 'vue-router'
+var openIdConnectRoutes = [
+    {
+        path: '/openid/redirect',
+        name: 'openIdConnectTokenRedirect',
+        component: script$1
+    },
+    {
+        path: '/openid/logout',
+        name: 'openIdConnectUnauthorizedRedirect',
+        component: script
+    }
+];
+
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
 
 function __awaiter(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 }
@@ -82,554 +473,13 @@ function __generator(thisArg, body) {
     }
 }
 
-var OpenIdUrlHelpers = /** @class */ (function () {
-    function OpenIdUrlHelpers() {
-    }
-    OpenIdUrlHelpers.buildInternalRedirectUrl = function (endpoint, encoded) {
-        if (encoded === void 0) { encoded = true; }
-        var port = '';
-        if (location.port) {
-            port = ':' + location.port;
-        }
-        var redirectBaseUrl = location.protocol + '//' + location.hostname + port;
-        if (encoded) {
-            return encodeURIComponent(redirectBaseUrl + '/' + endpoint);
-        }
-        else {
-            return redirectBaseUrl + '/' + endpoint;
-        }
-    };
-    OpenIdUrlHelpers.buildOpenIdParameterString = function (parameters) {
-        var parameterArray = [];
-        for (var _i = 0, _a = Object.entries(parameters); _i < _a.length; _i++) {
-            var _b = _a[_i], key = _b[0], param = _b[1];
-            if (param) {
-                parameterArray.push(key + '=' + param);
-            }
-        }
-        return parameterArray.join('&');
-    };
-    OpenIdUrlHelpers.buildFormUrlEncoded = function (object) {
-        var bodyArray = [];
-        for (var _i = 0, _a = Object.entries(object); _i < _a.length; _i++) {
-            var _b = _a[_i], key = _b[0], value = _b[1];
-            if (key !== 'redirect_uri') {
-                value = encodeURIComponent(value);
-            }
-            if (value) {
-                bodyArray.push(key + '=' + value);
-            }
-        }
-        return bodyArray.join('&');
-    };
-    return OpenIdUrlHelpers;
-}());
-
-var accessTokenKey = 'oidc-access-token';
-var refreshTokenKey = 'oidc-refresh-token';
-var TokenStorageHelpers = /** @class */ (function () {
-    function TokenStorageHelpers() {
-    }
-    TokenStorageHelpers.getSessionAccessToken = function () {
-        return sessionStorage.getItem(accessTokenKey) ? sessionStorage.getItem(accessTokenKey) : '';
-    };
-    TokenStorageHelpers.getSessionRefreshToken = function () {
-        return sessionStorage.getItem(refreshTokenKey) ? sessionStorage.getItem(refreshTokenKey) : '';
-    };
-    TokenStorageHelpers.setSessionTokens = function (tokens) {
-        sessionStorage.setItem(accessTokenKey, tokens.accessToken);
-        sessionStorage.setItem(refreshTokenKey, tokens.refreshToken);
-    };
-    TokenStorageHelpers.clearSessionTokens = function () {
-        sessionStorage.removeItem(accessTokenKey);
-        sessionStorage.removeItem(refreshTokenKey);
-    };
-    return TokenStorageHelpers;
-}());
-
-var loginRedirectRouteKey = 'oidc-login-redirect-route';
-var RedirectRouteStorageHelpers = /** @class */ (function () {
-    function RedirectRouteStorageHelpers() {
-    }
-    RedirectRouteStorageHelpers.setRedirectRoute = function (route) {
-        sessionStorage.setItem(loginRedirectRouteKey, route);
-    };
-    RedirectRouteStorageHelpers.getRedirectRoute = function () {
-        var redirectRoute = sessionStorage.getItem(loginRedirectRouteKey) ? sessionStorage.getItem(loginRedirectRouteKey) : '';
-        sessionStorage.removeItem(loginRedirectRouteKey);
-        return redirectRoute;
-    };
-    return RedirectRouteStorageHelpers;
-}());
-
-var OpenIdConnectRepository = /** @class */ (function () {
-    function OpenIdConnectRepository(configuration) {
-        this.configuration = configuration;
-    }
-    OpenIdConnectRepository.prototype.getTokens = function (authCode) {
-        if (this.configuration.serverBaseUrl) {
-            return this.getTokensFromServer(authCode);
-        }
-        else {
-            return this.getTokensFromProvider(authCode);
-        }
-    };
-    OpenIdConnectRepository.prototype.getTokensFromProvider = function (authCode) {
-        var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect');
-        var openIdConnectTokenUrl = this.configuration.baseUrl + "/" + this.configuration.tokenEndpoint;
-        var body = {
-            code: authCode,
-            grant_type: 'authorization_code',
-            client_id: this.configuration.clientId,
-            client_secret: this.configuration.clientSecret,
-            redirect_uri: redirectUrl
-        };
-        return axios.post(openIdConnectTokenUrl, OpenIdUrlHelpers.buildFormUrlEncoded(body), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
-    };
-    OpenIdConnectRepository.prototype.getTokensFromServer = function (authCode) {
-        var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.InternalRedirectUrl, false);
-        var serverTokenUrl = this.configuration.serverBaseUrl + "/" + this.configuration.serverTokenEndpoint;
-        var body = {
-            authCode: authCode,
-            realm: this.configuration.baseUrl,
-            clientId: this.configuration.clientId,
-            redirectUri: redirectUrl
-        };
-        return axios.post(serverTokenUrl, body);
-    };
-    OpenIdConnectRepository.prototype.refreshTokens = function (refreshToken) {
-        if (this.configuration.serverBaseUrl) {
-            return this.refreshTokensFromServer(refreshToken);
-        }
-        else {
-            return this.refreshTokensFromProvider(refreshToken);
-        }
-    };
-    OpenIdConnectRepository.prototype.refreshTokensFromProvider = function (refreshToken) {
-        var openIdConnectTokenUrl = this.configuration.baseUrl + "/" + this.configuration.tokenEndpoint;
-        var body = {
-            grant_type: 'refresh_token',
-            client_id: this.configuration.clientId,
-            refresh_token: refreshToken
-        };
-        return axios.post(openIdConnectTokenUrl, OpenIdUrlHelpers.buildFormUrlEncoded(body), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
-    };
-    OpenIdConnectRepository.prototype.refreshTokensFromServer = function (refreshToken) {
-        var serverRefreshUrl = this.configuration.serverBaseUrl + "/" + this.configuration.serverRefreshEndpoint;
-        var body = {
-            realm: this.configuration.baseUrl,
-            clientId: this.configuration.clientId,
-            refreshToken: refreshToken
-        };
-        return axios.post(serverRefreshUrl, body);
-    };
-    return OpenIdConnectRepository;
-}());
-
-var OpenIdConnectModule = /** @class */ (function (_super) {
-    __extends(OpenIdConnectModule, _super);
-    function OpenIdConnectModule() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        // Data
-        _this.accessToken = TokenStorageHelpers.getSessionAccessToken();
-        _this.refreshToken = TokenStorageHelpers.getSessionRefreshToken();
-        _this.configuration = {
-            baseUrl: '',
-            tokenEndpoint: '',
-            authEndpoint: '',
-            logoutEndpoint: '',
-            clientId: '',
-            authorizedRedirectRoute: '',
-            InternalRedirectUrl: 'openid/redirect'
-        };
-        _this.repository = new OpenIdConnectRepository(_this.configuration);
-        return _this;
-    }
-    // Mutations
-    OpenIdConnectModule.prototype.clearTokens = function () {
-        this.accessToken = '';
-        this.refreshToken = '';
-        TokenStorageHelpers.clearSessionTokens();
-    };
-    OpenIdConnectModule.prototype.setTokens = function (tokens) {
-        this.accessToken = tokens.accessToken;
-        this.refreshToken = tokens.refreshToken;
-        TokenStorageHelpers.setSessionTokens(tokens);
-    };
-    OpenIdConnectModule.prototype.loadSessionTokens = function (tokens) {
-        this.accessToken = TokenStorageHelpers.getSessionAccessToken();
-        this.refreshToken = TokenStorageHelpers.getSessionRefreshToken();
-    };
-    OpenIdConnectModule.prototype.initializeConfig = function (configuration) {
-        console.log('initializeConfig');
-        // Make sure that if serverBaseUrl is defined, we also have it's related endpoints
-        if (configuration.serverBaseUrl) {
-            if (!configuration.serverTokenEndpoint || !configuration.serverRefreshEndpoint) {
-                throw new Error('Configuration contains a serverBaseUrl but not all of the required server endpoints');
-            }
-        }
-        this.configuration = configuration;
-        this.repository = new OpenIdConnectRepository(configuration);
-    };
-    OpenIdConnectModule.prototype.setRefreshTokenPromise = function (promise) {
-        this.refreshTokenPromise = promise;
-    };
-    // Actions
-    OpenIdConnectModule.prototype.login = function (finalRedirectRoute) {
-        console.log('login');
-        // First check if there are still tokens in sessionStorage
-        this.context.commit('loadSessionTokens');
-        if (this.accessToken) {
-            return true;
-        }
-        console.log(this.configuration.InternalRedirectUrl);
-        var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.InternalRedirectUrl);
-        // Build openIdConnect url
-        var baseOpenIdConnectUrl = this.configuration.baseUrl + "/" + this.configuration.authEndpoint;
-        var openIdParameters = {
-            scope: this.configuration.scope ? this.configuration.scope : 'openid',
-            client_id: this.configuration.clientId,
-            response_type: 'code',
-            redirect_uri: redirectUrl
-        };
-        var openIdConnectUrl = baseOpenIdConnectUrl + '?' + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters);
-        // Save final redirect route in session storage so it can be used at the end of the openid flow
-        if (finalRedirectRoute) {
-            RedirectRouteStorageHelpers.setRedirectRoute(finalRedirectRoute);
-        }
-        window.location.href = openIdConnectUrl;
-    };
-    OpenIdConnectModule.prototype.fetchTokens = function (authCode) {
-        var _this = this;
-        console.log('fetchtokens');
-        return this.repository.getTokens(authCode).then(function (result) {
-            var tokens = {
-                accessToken: result.data['access_token'],
-                refreshToken: result.data['refresh_token']
-            };
-            _this.context.commit('setTokens', tokens);
-            var redirectRoute = _this.configuration.authorizedRedirectRoute;
-            // Overwrite redirect route if available in session storage
-            var storedRedirectRoute = RedirectRouteStorageHelpers.getRedirectRoute();
-            if (storedRedirectRoute) {
-                redirectRoute = storedRedirectRoute;
-            }
-            return redirectRoute;
-        });
-    };
-    OpenIdConnectModule.prototype.refreshTokens = function () {
-        var _this = this;
-        // Make sure refreshTokens isn't executed multiple times
-        console.log('refreshTokens');
-        if (!this.refreshTokenPromise) {
-            var promise = this.repository.refreshTokens(this.refreshToken);
-            this.context.commit('setRefreshTokenPromise', promise);
-            return promise.then(function (result) {
-                _this.context.commit('setRefreshTokenPromise', null);
-                var tokens = {
-                    accessToken: result.data['access_token'],
-                    refreshToken: result.data['refresh_token']
-                };
-                _this.context.commit('setTokens', tokens);
-                return tokens;
-            }, function (error) {
-                _this.context.commit('setRefreshTokenPromise', null);
-                _this.context.commit('clearTokens');
-                _this.context.dispatch('login');
-            });
-        }
-        return this.refreshTokenPromise;
-    };
-    OpenIdConnectModule.prototype.logout = function () {
-        console.log('logout');
-        // Overwrite unauthorized redirect route if given
-        var redirectRoute = 'openid/logout';
-        if (this.configuration.unauthorizedRedirectRoute) {
-            redirectRoute = this.configuration.unauthorizedRedirectRoute;
-        }
-        var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(redirectRoute);
-        // Build openIdConnect url
-        var baseOpenIdConnectUrl = this.configuration.baseUrl + "/" + this.configuration.logoutEndpoint;
-        var openIdParameters = {
-            scope: this.configuration.scope ? this.configuration.scope : 'openid',
-            client_id: this.configuration.clientId,
-            redirect_uri: redirectUrl
-        };
-        this.context.commit('clearTokens');
-        var openIdConnectUrl = baseOpenIdConnectUrl + '?' + OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters);
-        window.location.href = openIdConnectUrl;
-    };
-    Object.defineProperty(OpenIdConnectModule.prototype, "isLoggedIn", {
-        // Getters
-        get: function () {
-            return !!this.accessToken;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    __decorate([
-        vuexModuleDecorators.Mutation
-    ], OpenIdConnectModule.prototype, "clearTokens", null);
-    __decorate([
-        vuexModuleDecorators.Mutation
-    ], OpenIdConnectModule.prototype, "setTokens", null);
-    __decorate([
-        vuexModuleDecorators.Mutation
-    ], OpenIdConnectModule.prototype, "loadSessionTokens", null);
-    __decorate([
-        vuexModuleDecorators.Mutation
-    ], OpenIdConnectModule.prototype, "initializeConfig", null);
-    __decorate([
-        vuexModuleDecorators.Mutation
-    ], OpenIdConnectModule.prototype, "setRefreshTokenPromise", null);
-    __decorate([
-        vuexModuleDecorators.Action({})
-    ], OpenIdConnectModule.prototype, "login", null);
-    __decorate([
-        vuexModuleDecorators.Action({})
-    ], OpenIdConnectModule.prototype, "fetchTokens", null);
-    __decorate([
-        vuexModuleDecorators.Action({})
-    ], OpenIdConnectModule.prototype, "refreshTokens", null);
-    __decorate([
-        vuexModuleDecorators.Action({})
-    ], OpenIdConnectModule.prototype, "logout", null);
-    OpenIdConnectModule = __decorate([
-        vuexModuleDecorators.Module({ namespaced: true, name: 'openid' })
-    ], OpenIdConnectModule);
-    return OpenIdConnectModule;
-}(vuexModuleDecorators.VuexModule));
-
-var TokenRedirectPage = /** @class */ (function (_super) {
-    __extends(TokenRedirectPage, _super);
-    function TokenRedirectPage() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.hasErrored = false;
-        return _this;
-    }
-    TokenRedirectPage.prototype.mounted = function () {
-        var _this = this;
-        var accessCode = this.$route.query.code;
-        this.$store.dispatch('openid/fetchTokens', accessCode).then(function (redirectPath) {
-            _this.$router.push({ path: redirectPath });
-        }, function (error) {
-            _this.hasErrored = true;
-        });
-    };
-    TokenRedirectPage = __decorate([
-        Component
-    ], TokenRedirectPage);
-    return TokenRedirectPage;
-}(Vue));
-
-function normalizeComponent(template, style, script, scopeId, isFunctionalTemplate, moduleIdentifier
-/* server only */
-, shadowMode, createInjector, createInjectorSSR, createInjectorShadow) {
-  if (typeof shadowMode !== 'boolean') {
-    createInjectorSSR = createInjector;
-    createInjector = shadowMode;
-    shadowMode = false;
-  } // Vue.extend constructor export interop.
-
-
-  var options = typeof script === 'function' ? script.options : script; // render functions
-
-  if (template && template.render) {
-    options.render = template.render;
-    options.staticRenderFns = template.staticRenderFns;
-    options._compiled = true; // functional template
-
-    if (isFunctionalTemplate) {
-      options.functional = true;
-    }
-  } // scopedId
-
-
-  if (scopeId) {
-    options._scopeId = scopeId;
-  }
-
-  var hook;
-
-  if (moduleIdentifier) {
-    // server build
-    hook = function hook(context) {
-      // 2.3 injection
-      context = context || // cached call
-      this.$vnode && this.$vnode.ssrContext || // stateful
-      this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext; // functional
-      // 2.2 with runInNewContext: true
-
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__;
-      } // inject component styles
-
-
-      if (style) {
-        style.call(this, createInjectorSSR(context));
-      } // register component module identifier for async chunk inference
-
-
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier);
-      }
-    }; // used by ssr in case component is cached and beforeCreate
-    // never gets called
-
-
-    options._ssrRegister = hook;
-  } else if (style) {
-    hook = shadowMode ? function () {
-      style.call(this, createInjectorShadow(this.$root.$options.shadowRoot));
-    } : function (context) {
-      style.call(this, createInjector(context));
-    };
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // register for functional component in vue file
-      var originalRender = options.render;
-
-      options.render = function renderWithStyleInjection(h, context) {
-        hook.call(context);
-        return originalRender(h, context);
-      };
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate;
-      options.beforeCreate = existing ? [].concat(existing, hook) : [hook];
-    }
-  }
-
-  return script;
-}
-
-var normalizeComponent_1 = normalizeComponent;
-
-/* script */
-const __vue_script__ = TokenRedirectPage;
-
-/* template */
-var __vue_render__ = function() {
-  var _vm = this;
-  var _h = _vm.$createElement;
-  var _c = _vm._self._c || _h;
-  return _vm.hasErrored
-    ? _c("div", [_vm._v("Something went wrong during openIdConnect login.")])
-    : _vm._e()
-};
-var __vue_staticRenderFns__ = [];
-__vue_render__._withStripped = true;
-
-  /* style */
-  const __vue_inject_styles__ = undefined;
-  /* scoped */
-  const __vue_scope_id__ = undefined;
-  /* module identifier */
-  const __vue_module_identifier__ = undefined;
-  /* functional template */
-  const __vue_is_functional_template__ = false;
-  /* style inject */
-  
-  /* style inject SSR */
-  
-
-  
-  var TokenRedirectPage$1 = normalizeComponent_1(
-    { render: __vue_render__, staticRenderFns: __vue_staticRenderFns__ },
-    __vue_inject_styles__,
-    __vue_script__,
-    __vue_scope_id__,
-    __vue_is_functional_template__,
-    __vue_module_identifier__,
-    undefined,
-    undefined
-  );
-
-var UnauthorizedRedirectPage = /** @class */ (function (_super) {
-    __extends(UnauthorizedRedirectPage, _super);
-    function UnauthorizedRedirectPage() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.hasErrored = false;
-        return _this;
-    }
-    UnauthorizedRedirectPage.prototype.mounted = function () {
-        this.$store.dispatch('openid/login');
-    };
-    UnauthorizedRedirectPage = __decorate([
-        Component
-    ], UnauthorizedRedirectPage);
-    return UnauthorizedRedirectPage;
-}(Vue));
-
-/* script */
-const __vue_script__$1 = UnauthorizedRedirectPage;
-
-/* template */
-var __vue_render__$1 = function() {
-  var _vm = this;
-  var _h = _vm.$createElement;
-  var _c = _vm._self._c || _h;
-  return _vm.hasErrored
-    ? _c("div", [_vm._v("Something went wrong during openIdConnect redirect.")])
-    : _vm._e()
-};
-var __vue_staticRenderFns__$1 = [];
-__vue_render__$1._withStripped = true;
-
-  /* style */
-  const __vue_inject_styles__$1 = undefined;
-  /* scoped */
-  const __vue_scope_id__$1 = undefined;
-  /* module identifier */
-  const __vue_module_identifier__$1 = undefined;
-  /* functional template */
-  const __vue_is_functional_template__$1 = false;
-  /* style inject */
-  
-  /* style inject SSR */
-  
-
-  
-  var UnauthorizedRedirectPage$1 = normalizeComponent_1(
-    { render: __vue_render__$1, staticRenderFns: __vue_staticRenderFns__$1 },
-    __vue_inject_styles__$1,
-    __vue_script__$1,
-    __vue_scope_id__$1,
-    __vue_is_functional_template__$1,
-    __vue_module_identifier__$1,
-    undefined,
-    undefined
-  );
-
-var openIdConnectRoutes = [
-    {
-        path: '/openid/redirect',
-        name: 'openIdConnectTokenRedirect',
-        component: TokenRedirectPage$1
-    },
-    {
-        path: '/openid/logout',
-        name: 'openIdConnectUnauthorizedRedirect',
-        component: UnauthorizedRedirectPage$1
-    }
-];
-
 var OpenIdConnectInterceptors = /** @class */ (function () {
     function OpenIdConnectInterceptors() {
     }
     OpenIdConnectInterceptors.buildRequestTokenInterceptorCallback = function (store) {
         return function (config) {
-            config.headers.common['Authorization'] = "Bearer " + store.state.openid.accessToken;
+            var authorization = 'Authorization';
+            config.headers.common[authorization] = "Bearer " + store.getters.accessToken;
             return config;
         };
     };
@@ -640,7 +490,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                 if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
                     try {
                         // Refresh tokens and retry call
-                        return [2 /*return*/, store.dispatch('openid/refreshTokens').then(function (newTokens) {
+                        return [2 /*return*/, store.dispatch('refreshTokens').then(function (newTokens) {
                                 errorVm.response.config.headers.Authorization = "Bearer " + newTokens.accessToken;
                                 // Use custom retryAxiosInstance if given
                                 if (retryAxiosInstance) {
@@ -654,7 +504,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                 }
                                 else {
                                     return new Promise(function (resolve, reject) {
-                                        axios.request(errorVm.response.config).then(function (response) {
+                                        axios__default['default'].request(errorVm.response.config).then(function (response) {
                                             resolve(response);
                                         }).catch(function (error) {
                                             reject(error);
@@ -681,14 +531,15 @@ function OpenIdConnectPlugin(Vue, options) {
         throw new Error('Inuits-vuejs-oidc needs a router');
     if (!options.configuration)
         throw new Error('Inuits-vuejs-oidc needs configuration');
-    var oidModule = vuexModuleDecorators.getModule(OpenIdConnectModule, options.store);
     options.store.registerModule('openid', OpenIdConnectModule);
-    options.store.commit('openid/initializeConfig', options.configuration);
-    options.router.addRoutes(openIdConnectRoutes);
+    options.store.dispatch('initializeConfig', options.configuration);
+    openIdConnectRoutes.forEach(function (route) {
+        options.router.addRoute(route);
+    });
     // Add some auth guards to routes with specific meta tags
     options.router.beforeEach(function (to, from, next) {
         if (to.matched.some(function (record) { return record.meta.requiresOpenIdAuth; })) {
-            if (!options.store.getters['openid/isLoggedIn']) {
+            if (!options.store.getters.isLoggedIn) {
                 if (options.configuration.unauthorizedRedirectRoute) {
                     next({
                         path: '/login',
@@ -696,7 +547,7 @@ function OpenIdConnectPlugin(Vue, options) {
                     });
                 }
                 else {
-                    options.store.dispatch('openid/login', to.fullPath);
+                    options.store.dispatch('login', to.fullPath);
                     next();
                 }
             }

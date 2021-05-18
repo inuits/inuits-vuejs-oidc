@@ -1,24 +1,39 @@
 <template>
-    <div v-if="hasErrored">Something went wrong during openIdConnect login.</div>
+  <div v-if="hasError">
+    Something went wrong during openIdConnect login.
+  </div>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import { defineComponent, ref } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter, useRoute } from 'vue-router'
+export default defineComponent({
+  name: 'UnauthorizedRedirectPage',
+  props: {
+    hasErrored: {
+      type: Boolean,
+      default: false
 
-@Component
-export default class TokenRedirectPage extends Vue {
-  hasErrored = false
-
-  mounted () {
-    const accessCode = this.$route.query.code
-    this.$store.dispatch('openid/fetchTokens', accessCode).then(
-      (redirectPath) => {
-        this.$router.push({ path: redirectPath })
+    }
+  },
+  setup () {
+    const store = useStore()
+    const route = useRoute()
+    const router = useRouter()
+    const hasError = ref<boolean>(false)
+    const accessCode = route.query.code
+    store.dispatch('fetchTokens', accessCode).then(
+      (redirectPath: any) => {
+        router.push({ path: redirectPath })
       },
-      (error) => {
-        this.hasErrored = true
-      })
+      (error: any) => {
+        hasError.value = true
+      }
+    )
+    return {
+      hasError
+    }
   }
-}
+})
 </script>
