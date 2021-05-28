@@ -1,6 +1,6 @@
-import { OpenIdConnectConfiguration } from '@/interfaces/OpenIdConnectConfiguration';
-import { OpenIdConnectTokens } from '@/interfaces/OpenIdConnectTokens';
-import { OpenIdConnectRepository } from '@/repositories/OpenIdConnectRepository';
+import { OpenIdConnectConfiguration } from "@/interfaces/OpenIdConnectConfiguration";
+import { OpenIdConnectTokens } from "@/interfaces/OpenIdConnectTokens";
+import { OpenIdConnectRepository } from "@/repositories/OpenIdConnectRepository";
 export declare enum Tokens {
     AccessToken = "access_token",
     RefreshToken = "refresh_token"
@@ -30,7 +30,7 @@ declare const _default: {
         setRefreshTokenPromise({ commit }: any, data: any): void;
         login({ commit, state }: any, finalRedirectRoute?: string): boolean;
         fetchTokens({ dispatch, state }: any, authCode: string): any;
-        refreshTokens({ dispatch, store }: any): any;
+        refreshTokens({ dispatch, state }: any): any;
         logout({ commit, state }: any, data: any): void;
     };
     getters: {
