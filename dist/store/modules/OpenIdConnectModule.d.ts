@@ -1,6 +1,6 @@
-import { OpenIdConnectConfiguration } from "@/interfaces/OpenIdConnectConfiguration";
-import { OpenIdConnectTokens } from "@/interfaces/OpenIdConnectTokens";
-import { OpenIdConnectRepository } from "@/repositories/OpenIdConnectRepository";
+import { OpenIdConnectConfiguration } from '@/interfaces/OpenIdConnectConfiguration';
+import { OpenIdConnectTokens } from '@/interfaces/OpenIdConnectTokens';
+import { OpenIdConnectRepository } from '@/repositories/OpenIdConnectRepository';
 export declare enum Tokens {
     AccessToken = "access_token",
     RefreshToken = "refresh_token"

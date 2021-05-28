@@ -176,14 +176,14 @@ var TokenStorageHelpers = /** @class */ (function () {
 }());
 
 var configuration = {
-    baseUrl: "",
-    tokenEndpoint: "",
-    authEndpoint: "",
-    logoutEndpoint: "",
-    clientId: "",
-    authorizedRedirectRoute: "",
-    InternalRedirectUrl: "openid/redirect",
-    encodeRedirectUrl: false,
+    baseUrl: '',
+    tokenEndpoint: '',
+    authEndpoint: '',
+    logoutEndpoint: '',
+    clientId: '',
+    authorizedRedirectRoute: '',
+    InternalRedirectUrl: 'openid/redirect',
+    encodeRedirectUrl: false
 };
 var Tokens;
 (function (Tokens) {
@@ -197,13 +197,13 @@ var OpenIdConnectModule = {
             refreshToken: TokenStorageHelpers.getSessionRefreshToken(),
             configuration: configuration,
             refreshTokenPromise: false,
-            repository: new OpenIdConnectRepository(configuration),
-        },
+            repository: new OpenIdConnectRepository(configuration)
+        }
     }); },
     mutations: {
         CLEAR_TOKENS: function (state) {
-            state.openid.accessToken = "";
-            state.openid.refreshToken = "";
+            state.openid.accessToken = '';
+            state.openid.refreshToken = '';
             TokenStorageHelpers.clearSessionTokens();
         },
         SET_TOKENS: function (state, tokens) {
@@ -220,44 +220,44 @@ var OpenIdConnectModule = {
             if (configuration.serverBaseUrl) {
                 if (!configuration.serverTokenEndpoint ||
                     !configuration.serverRefreshEndpoint) {
-                    throw new Error("Configuration contains a serverBaseUrl but not all of the required server endpoints");
+                    throw new Error('Configuration contains a serverBaseUrl but not all of the required server endpoints');
                 }
             }
             if (!configuration.InternalRedirectUrl) {
-                configuration.InternalRedirectUrl = "openid/redirect";
+                configuration.InternalRedirectUrl = 'openid/redirect';
             }
             state.openid.configuration = configuration;
             state.openid.repository = new OpenIdConnectRepository(configuration);
         },
         SET_REFRESH_TOKEN_PROMISE: function (state, promise) {
             state.openid.refreshTokenPromise = promise;
-        },
+        }
     },
     actions: {
         clearTokens: function (_a, data) {
             var commit = _a.commit;
-            commit("CLEAR_TOKENS", data);
+            commit('CLEAR_TOKENS', data);
         },
         setTokens: function (_a, data) {
             var commit = _a.commit;
-            commit("SET_TOKENS", data);
+            commit('SET_TOKENS', data);
         },
         loadSessionTokens: function (_a, data) {
             var commit = _a.commit;
-            commit("LOAD_SESSION_TOKENS", data);
+            commit('LOAD_SESSION_TOKENS', data);
         },
         initializeConfig: function (_a, data) {
             var commit = _a.commit;
-            commit("INITIALIZE_CONFIG", data);
+            commit('INITIALIZE_CONFIG', data);
         },
         setRefreshTokenPromise: function (_a, data) {
             var commit = _a.commit;
-            commit("SET_REFRESH_TOKEN_PROMISE", data);
+            commit('SET_REFRESH_TOKEN_PROMISE', data);
         },
         login: function (_a, finalRedirectRoute) {
             var commit = _a.commit, state = _a.state;
             // First check if there are still tokens in sessionStorage
-            commit("LOAD_SESSION_TOKENS");
+            commit('LOAD_SESSION_TOKENS');
             if (state.openid.accessToken) {
                 return true;
             }
@@ -268,10 +268,10 @@ var OpenIdConnectModule = {
             var openIdParameters = {
                 scope: state.openid.configuration.scope
                     ? state.openid.configuration.scope
-                    : "openid",
+                    : 'openid',
                 client_id: state.openid.configuration.clientId,
-                response_type: "code",
-                redirect_uri: redirectUrl,
+                response_type: 'code',
+                redirect_uri: redirectUrl
             };
             var openIdConnectUrl = baseOpenIdConnectUrl +
                 OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters, state.openid.configuration.encodeRedirectUrl);
@@ -286,9 +286,9 @@ var OpenIdConnectModule = {
             return state.openid.repository.getTokens(authCode).then(function (result) {
                 var tokens = {
                     accessToken: result.data[Tokens.AccessToken],
-                    refreshToken: result.data[Tokens.RefreshToken],
+                    refreshToken: result.data[Tokens.RefreshToken]
                 };
-                dispatch("setTokens", tokens);
+                dispatch('setTokens', tokens);
                 var redirectRoute = state.openid.configuration.authorizedRedirectRoute;
                 // Overwrite redirect route if available in session storage
                 var storedRedirectRoute = RedirectRouteStorageHelpers.getRedirectRoute();
@@ -303,19 +303,19 @@ var OpenIdConnectModule = {
             if (!state.openid.refreshTokenPromise) {
                 console.log('Refreshing tokens');
                 var promise = state.openid.repository.refreshTokens(state.openid.refreshToken);
-                dispatch("setRefreshTokenPromise", promise);
+                dispatch('setRefreshTokenPromise', promise);
                 return promise.then(function (result) {
-                    dispatch("setRefreshTokenPromise", null);
+                    dispatch('setRefreshTokenPromise', null);
                     var tokens = {
                         accessToken: result.data[Tokens.AccessToken],
-                        refreshToken: result.data[Tokens.RefreshToken],
+                        refreshToken: result.data[Tokens.RefreshToken]
                     };
-                    dispatch("setTokens", tokens);
+                    dispatch('setTokens', tokens);
                     return tokens;
                 }, function (error) {
-                    dispatch("setRefreshTokenPromise", null);
-                    dispatch("clearTokens");
-                    dispatch("login");
+                    dispatch('setRefreshTokenPromise', null);
+                    dispatch('clearTokens');
+                    dispatch('login');
                 });
             }
             console.log('Using existing refresh token promise');
@@ -324,7 +324,7 @@ var OpenIdConnectModule = {
         logout: function (_a, data) {
             var commit = _a.commit, state = _a.state;
             // Overwrite unauthorized redirect route if given
-            var redirectRoute = "openid/logout";
+            var redirectRoute = 'openid/logout';
             if (state.openid.configuration.unauthorizedRedirectRoute) {
                 redirectRoute = state.openid.configuration.unauthorizedRedirectRoute;
             }
@@ -334,16 +334,16 @@ var OpenIdConnectModule = {
             var openIdParameters = {
                 scope: state.openid.configuration.scope
                     ? state.openid.configuration.scope
-                    : "openid",
+                    : 'openid',
                 client_id: state.openid.configuration.clientId,
-                redirect_uri: redirectUrl,
+                redirect_uri: redirectUrl
             };
-            commit("clearTokens");
+            commit('clearTokens');
             var openIdConnectUrl = baseOpenIdConnectUrl +
-                "?" +
+                '?' +
                 OpenIdUrlHelpers.buildOpenIdParameterString(openIdParameters, state.openid.configuration.encodeRedirectUrl);
             window.location.href = openIdConnectUrl;
-        },
+        }
     },
     getters: {
         isLoggedIn: function (state) {
@@ -351,8 +351,8 @@ var OpenIdConnectModule = {
         },
         accessToken: function (state) {
             return state.openid.accessToken;
-        },
-    },
+        }
+    }
 };
 
 var script$1 = vue.defineComponent({
