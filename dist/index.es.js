@@ -188,7 +188,7 @@ var OpenIdConnectModule = {
             accessToken: TokenStorageHelpers.getSessionAccessToken(),
             refreshToken: TokenStorageHelpers.getSessionRefreshToken(),
             configuration: configuration,
-            refreshTokenPromise: Promise,
+            refreshTokenPromise: false,
             repository: new OpenIdConnectRepository(configuration),
         },
     }); },
@@ -293,6 +293,7 @@ var OpenIdConnectModule = {
         refreshTokens: function (_a) {
             var dispatch = _a.dispatch, state = _a.state;
             if (!state.openid.refreshTokenPromise) {
+                console.log('Refreshing tokens');
                 var promise = state.openid.repository.refreshTokens(state.openid.refreshToken);
                 dispatch("setRefreshTokenPromise", promise);
                 return promise.then(function (result) {
@@ -309,6 +310,7 @@ var OpenIdConnectModule = {
                     dispatch("login");
                 });
             }
+            console.log('Using existing refresh token promise');
             return state.openid.refreshTokenPromise;
         },
         logout: function (_a, data) {

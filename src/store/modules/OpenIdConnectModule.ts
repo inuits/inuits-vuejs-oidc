@@ -27,7 +27,7 @@ export default {
       accessToken: TokenStorageHelpers.getSessionAccessToken(),
       refreshToken: TokenStorageHelpers.getSessionRefreshToken(),
       configuration: configuration,
-      refreshTokenPromise: Promise,
+      refreshTokenPromise: false,
       repository: new OpenIdConnectRepository(configuration),
     },
   }),
@@ -146,6 +146,7 @@ export default {
     },
     refreshTokens({ dispatch, state }: any) {
       if (!state.openid.refreshTokenPromise) {
+        console.log('Refreshing tokens')
         const promise = state.openid.repository.refreshTokens(
           state.openid.refreshToken
         );
@@ -168,6 +169,7 @@ export default {
           }
         );
       }
+      console.log('Using existing refresh token promise')
       return state.openid.refreshTokenPromise;
     },
     logout({ commit, state }: any, data: any) {

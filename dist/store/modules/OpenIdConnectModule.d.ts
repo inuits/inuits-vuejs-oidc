@@ -11,7 +11,7 @@ declare const _default: {
             accessToken: string;
             refreshToken: string;
             configuration: OpenIdConnectConfiguration;
-            refreshTokenPromise: PromiseConstructor;
+            refreshTokenPromise: boolean;
             repository: OpenIdConnectRepository;
         };
     };
