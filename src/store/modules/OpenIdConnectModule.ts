@@ -82,7 +82,7 @@ export default {
       commit("INITIALIZE_CONFIG", data);
     },
     setRefreshTokenPromise({ commit }: any, data: any) {
-      commit("INITIALIZE_CONFIG", data);
+      commit("SET_REFRESH_TOKEN_PROMISE", data);
     },
     login({ commit, state }: any, finalRedirectRoute?: string) {
       // First check if there are still tokens in sessionStorage

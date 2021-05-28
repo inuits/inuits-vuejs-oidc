@@ -244,7 +244,7 @@ var OpenIdConnectModule = {
         },
         setRefreshTokenPromise: function (_a, data) {
             var commit = _a.commit;
-            commit("INITIALIZE_CONFIG", data);
+            commit("SET_REFRESH_TOKEN_PROMISE", data);
         },
         login: function (_a, finalRedirectRoute) {
             var commit = _a.commit, state = _a.state;
