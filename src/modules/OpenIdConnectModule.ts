@@ -6,6 +6,7 @@ import { OpenIdUrlHelpers } from '../utils/OpenIdUrlHelpers'
 import { TokenStorageHelpers } from '../utils/TokenStorageHelpers'
 import { RedirectRouteStorageHelpers } from '../utils/RedirectRouteStorageHelpers'
 import { OpenIdConnectRepository } from '../repositories/OpenIdConnectRepository'
+console.log('LOG TESTING TO DEBUG THE REFRESH CALL')
 
 @Module({ namespaced: true, name: 'openid' })
 export class OpenIdConnectModule extends VuexModule {
@@ -50,6 +51,7 @@ export class OpenIdConnectModule extends VuexModule {
 
   @Mutation
   initializeConfig (configuration: OpenIdConnectConfiguration) {
+    console.log('LOG TESTING TO DEBUG THE REFRESH CALL')
     console.log('initializeConfig')
     // Make sure that if serverBaseUrl is defined, we also have it's related endpoints
     if (configuration.serverBaseUrl) {

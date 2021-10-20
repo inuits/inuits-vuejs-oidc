@@ -228,6 +228,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
     return OpenIdConnectRepository;
 }());
 
+console.log('LOG TESTING TO DEBUG THE REFRESH CALL');
 var OpenIdConnectModule = /** @class */ (function (_super) {
     __extends(OpenIdConnectModule, _super);
     function OpenIdConnectModule() {
@@ -263,6 +264,7 @@ var OpenIdConnectModule = /** @class */ (function (_super) {
         this.refreshToken = TokenStorageHelpers.getSessionRefreshToken();
     };
     OpenIdConnectModule.prototype.initializeConfig = function (configuration) {
+        console.log('LOG TESTING TO DEBUG THE REFRESH CALL');
         console.log('initializeConfig');
         // Make sure that if serverBaseUrl is defined, we also have it's related endpoints
         if (configuration.serverBaseUrl) {
@@ -622,6 +624,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
     function OpenIdConnectInterceptors() {
     }
     OpenIdConnectInterceptors.buildRequestTokenInterceptorCallback = function (store) {
+        console.log('buildRequestTokenInterceptorCallback');
         return function (config) {
             config.headers.common['Authorization'] = "Bearer " + store.state.openid.accessToken;
             return config;
@@ -630,14 +633,19 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
     OpenIdConnectInterceptors.buildResponseErrorInterceptorCallback = function (errorVm, store, retryAxiosInstance) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                console.log('LOG 1: ', errorVm);
                 // Only intercept 401 unauthorized calls
                 if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
+                    console.log('LOG 2: ', errorVm);
                     try {
+                        console.log('LOG 3: ', errorVm);
                         // Refresh tokens and retry call
                         return [2 /*return*/, store.dispatch('openid/refreshTokens').then(function (newTokens) {
+                                console.log('LOG 4: ', errorVm);
                                 errorVm.response.config.headers.Authorization = "Bearer " + newTokens.accessToken;
                                 // Use custom retryAxiosInstance if given
                                 if (retryAxiosInstance) {
+                                    console.log('LOG 5: ', retryAxiosInstance);
                                     return new Promise(function (resolve, reject) {
                                         retryAxiosInstance.request(errorVm.response.config).then(function (response) {
                                             resolve(response);
@@ -647,10 +655,13 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                     });
                                 }
                                 else {
+                                    console.log('LOG 6:');
                                     return new Promise(function (resolve, reject) {
                                         axios.request(errorVm.response.config).then(function (response) {
+                                            console.log('LOG 7: ', response);
                                             resolve(response);
                                         }).catch(function (error) {
+                                            console.log('LOG 8: ', error);
                                             reject(error);
                                         });
                                     });
@@ -658,6 +669,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                             })];
                     }
                     catch (e) {
+                        console.log('LOG 9: ', e);
                         throw errorVm;
                     }
                 }
