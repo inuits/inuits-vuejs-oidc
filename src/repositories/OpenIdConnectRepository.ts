@@ -11,7 +11,7 @@ export class OpenIdConnectRepository {
 
   getTokens (authCode: string): Promise<any> {
     if (this.configuration.serverBaseUrl) {
-      return this.getTokensFromServer(authCode)
+      return this.getTokensFromServer(authCode) // KOMT HIERIN
     } else {
       return this.getTokensFromProvider(authCode)
     }
