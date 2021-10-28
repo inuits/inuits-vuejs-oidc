@@ -12,7 +12,7 @@ export class OpenIdConnectInterceptors {
 
   public static async buildResponseErrorInterceptorCallback (errorVm: any, store: Store<any>, retryAxiosInstance?: any) {
     console.log('LOG 1: ', errorVm)
-    console.log('LOG 1.1: ', errorVm.response)
+    console.log('LOG 1.1: ', errorVm.response, errorVm.message)
     console.log('LOG 1.2: ', errorVm.response.status)
     // Only intercept 401 unauthorized calls
     if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
