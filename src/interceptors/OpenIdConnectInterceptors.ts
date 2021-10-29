@@ -15,10 +15,11 @@ export class OpenIdConnectInterceptors {
     console.log('LOG 1.1: ', errorVm.response, errorVm.message)
     console.log('LOG 1.2: ', errorVm.response.status)
     // Only intercept 401 unauthorized calls
-    if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
+    if ((errorVm.response && errorVm.response.status && errorVm.response.status === 401) || (errorVm.message && errorVm.message === 'Network Error')) {
       console.log('LOG 2: ', errorVm)
+      console.log('LOG 2.1: ', errorVm.message)
       try {
-        console.log('LOG 3: ', errorVm)
+        console.log('LOG 3 (TRY REFRESHING TOKENS): ', errorVm)
         // Refresh tokens and retry call
         return store.dispatch('openid/refreshTokens').then((newTokens: any) => {
           console.log('LOG 4: ', errorVm)
@@ -47,7 +48,7 @@ export class OpenIdConnectInterceptors {
           }
         })
       } catch (e) {
-        console.log('LOG 9: ', e)
+        console.log('LOG 9 (CATCHING ERROR): ', e)
         throw errorVm
       }
     }
