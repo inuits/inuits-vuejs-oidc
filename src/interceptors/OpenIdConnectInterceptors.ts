@@ -12,14 +12,13 @@ export class OpenIdConnectInterceptors {
 
   public static async buildResponseErrorInterceptorCallback (errorVm: any, store: Store<any>, retryAxiosInstance?: any) {
     console.log('LOG 1: ', errorVm)
-    console.log('LOG 1.1: ', errorVm.response, errorVm.message)
+    console.log('LOG 1.1 (Error Message): ', errorVm.response, errorVm.message)
     console.log('LOG 1.2: ', errorVm.response.status)
     // Only intercept 401 unauthorized calls
-    if (errorVm) {
+    if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
       console.log('LOG 2: ', errorVm)
-      console.log('LOG 2.1: ', errorVm.message)
       try {
-        console.log('LOG 3 (TRY REFRESHING TOKENS): ', errorVm)
+        console.log('LOG 3: ', errorVm)
         // Refresh tokens and retry call
         return store.dispatch('openid/refreshTokens').then((newTokens: any) => {
           console.log('LOG 4: ', errorVm)
@@ -48,7 +47,7 @@ export class OpenIdConnectInterceptors {
           }
         })
       } catch (e) {
-        console.log('LOG 9 (CATCHING ERROR): ', e)
+        console.log('LOG 9: ', e)
         throw errorVm
       }
     }
