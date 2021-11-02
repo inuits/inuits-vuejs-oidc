@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { defineComponent, ref, openBlock, createBlock, createCommentVNode } from 'vue';
+import { defineComponent, ref, openBlock, createElementBlock, createCommentVNode } from 'vue';
 import { useStore } from 'vuex';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -376,7 +376,7 @@ const _hoisted_1$1 = { key: 0 };
 
 function render$1(_ctx, _cache, $props, $setup, $data, $options) {
   return (_ctx.hasError)
-    ? (openBlock(), createBlock("div", _hoisted_1$1, " Something went wrong during openIdConnect login. "))
+    ? (openBlock(), createElementBlock("div", _hoisted_1$1, " Something went wrong during openIdConnect login. "))
     : createCommentVNode("v-if", true)
 }
 
@@ -401,7 +401,7 @@ const _hoisted_1 = { key: 0 };
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (_ctx.hasErrored)
-    ? (openBlock(), createBlock("div", _hoisted_1, "Something went wrong during openIdConnect redirect."))
+    ? (openBlock(), createElementBlock("div", _hoisted_1, "Something went wrong during openIdConnect redirect."))
     : createCommentVNode("v-if", true)
 }
 

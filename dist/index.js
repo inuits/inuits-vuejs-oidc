@@ -88,7 +88,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
             client_secret: this.configuration.clientSecret,
             redirect_uri: redirectUrl
         };
-        return axios__default['default'].post(openIdConnectTokenUrl, OpenIdUrlHelpers.buildFormUrlEncoded(body), {
+        return axios__default["default"].post(openIdConnectTokenUrl, OpenIdUrlHelpers.buildFormUrlEncoded(body), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
@@ -103,7 +103,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
             clientId: this.configuration.clientId,
             redirectUri: redirectUrl
         };
-        return axios__default['default'].post(serverTokenUrl, body);
+        return axios__default["default"].post(serverTokenUrl, body);
     };
     OpenIdConnectRepository.prototype.refreshTokens = function (refreshToken) {
         if (this.configuration.serverBaseUrl) {
@@ -120,7 +120,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
             client_id: this.configuration.clientId,
             refresh_token: refreshToken
         };
-        return axios__default['default'].post(openIdConnectTokenUrl, OpenIdUrlHelpers.buildFormUrlEncoded(body), {
+        return axios__default["default"].post(openIdConnectTokenUrl, OpenIdUrlHelpers.buildFormUrlEncoded(body), {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
@@ -133,7 +133,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
             clientId: this.configuration.clientId,
             refreshToken: refreshToken
         };
-        return axios__default['default'].post(serverRefreshUrl, body);
+        return axios__default["default"].post(serverRefreshUrl, body);
     };
     return OpenIdConnectRepository;
 }());
@@ -384,7 +384,7 @@ const _hoisted_1$1 = { key: 0 };
 
 function render$1(_ctx, _cache, $props, $setup, $data, $options) {
   return (_ctx.hasError)
-    ? (vue.openBlock(), vue.createBlock("div", _hoisted_1$1, " Something went wrong during openIdConnect login. "))
+    ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_1$1, " Something went wrong during openIdConnect login. "))
     : vue.createCommentVNode("v-if", true)
 }
 
@@ -409,7 +409,7 @@ const _hoisted_1 = { key: 0 };
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return (_ctx.hasErrored)
-    ? (vue.openBlock(), vue.createBlock("div", _hoisted_1, "Something went wrong during openIdConnect redirect."))
+    ? (vue.openBlock(), vue.createElementBlock("div", _hoisted_1, "Something went wrong during openIdConnect redirect."))
     : vue.createCommentVNode("v-if", true)
 }
 
@@ -514,7 +514,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                 }
                                 else {
                                     return new Promise(function (resolve, reject) {
-                                        axios__default['default'].request(errorVm.response.config).then(function (response) {
+                                        axios__default["default"].request(errorVm.response.config).then(function (response) {
                                             resolve(response);
                                         }).catch(function (error) {
                                             reject(error);
