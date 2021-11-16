@@ -633,6 +633,10 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
     OpenIdConnectInterceptors.buildResponseErrorInterceptorCallback = function (errorVm, store, retryAxiosInstance) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
+                console.log('STRINGIFY: ', JSON.stringify(errorVm));
+                console.log('PARSED: ', JSON.parse(JSON.stringify(errorVm)));
+                errorVm = JSON.parse(JSON.stringify(errorVm));
+                console.log('STRINGIFIED AND PARSED: ', errorVm);
                 console.log('LOG 1: ', errorVm);
                 console.log('LOG 1.1 (Error Message): ', errorVm.response, errorVm.message);
                 console.log('UPDATING...');

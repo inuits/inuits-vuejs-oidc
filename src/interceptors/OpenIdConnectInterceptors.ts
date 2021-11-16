@@ -11,6 +11,13 @@ export class OpenIdConnectInterceptors {
   }
 
   public static async buildResponseErrorInterceptorCallback (errorVm: any, store: Store<any>, retryAxiosInstance?: any) {
+    console.log('STRINGIFY: ', JSON.stringify(errorVm))
+    console.log('PARSED: ', JSON.parse(JSON.stringify(errorVm)))
+
+    errorVm = JSON.parse(JSON.stringify(errorVm))
+    
+    console.log('STRINGIFIED AND PARSED: ', errorVm)
+
     console.log('LOG 1: ', errorVm)
     console.log('LOG 1.1 (Error Message): ', errorVm.response, errorVm.message)
     console.log('UPDATING...')
