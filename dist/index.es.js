@@ -635,6 +635,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
             return __generator(this, function (_a) {
                 console.log('LOG 1: ', errorVm);
                 console.log('LOG 1.1 (Error Message): ', errorVm.response, errorVm.message);
+                console.log('UPDATING...');
                 console.log('LOG 1.2: ', errorVm.response.status);
                 // Only intercept 401 unauthorized calls
                 if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
