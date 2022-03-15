@@ -73,7 +73,6 @@ export default {
       commit('CLEAR_TOKENS', data)
     },
     setTokens ({ commit }: any, data: any) {
-      console.log('SETTING TOKENS!!!')
       commit('SET_TOKENS', data)
     },
     loadSessionTokens ({ commit }: any, data: any) {
@@ -147,7 +146,6 @@ export default {
     },
     refreshTokens ({ dispatch, state }: any) {
       if (!state.openid.refreshTokenPromise) {
-        console.log('Refreshing tokens')
         const promise = state.openid.repository.refreshTokens(
           state.openid.refreshToken
         )
@@ -155,7 +153,6 @@ export default {
 
         return promise.then(
           (result: any) => {
-            console.log('AWAIT IMPLEMENTED 8', result)
             dispatch('setRefreshTokenPromise', null)
             const tokens = {
               accessToken: result.data[Tokens.AccessToken],
@@ -171,7 +168,6 @@ export default {
           }
         )
       }
-      console.log('AWAIT IMPLEMENTED 6')
       console.log('Using existing refresh token promise')
       return state.openid.refreshTokenPromise
     },

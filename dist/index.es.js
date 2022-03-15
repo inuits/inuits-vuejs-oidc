@@ -232,7 +232,6 @@ var OpenIdConnectModule = {
         },
         setTokens: function (_a, data) {
             var commit = _a.commit;
-            console.log('SETTING TOKENS!!!');
             commit('SET_TOKENS', data);
         },
         loadSessionTokens: function (_a, data) {
@@ -294,11 +293,9 @@ var OpenIdConnectModule = {
         refreshTokens: function (_a) {
             var dispatch = _a.dispatch, state = _a.state;
             if (!state.openid.refreshTokenPromise) {
-                console.log('Refreshing tokens');
                 var promise = state.openid.repository.refreshTokens(state.openid.refreshToken);
                 dispatch('setRefreshTokenPromise', promise);
                 return promise.then(function (result) {
-                    console.log('AWAIT IMPLEMENTED 8', result);
                     dispatch('setRefreshTokenPromise', null);
                     var tokens = {
                         accessToken: result.data[Tokens.AccessToken],
@@ -312,7 +309,6 @@ var OpenIdConnectModule = {
                     dispatch('login');
                 });
             }
-            console.log('AWAIT IMPLEMENTED 6');
             console.log('Using existing refresh token promise');
             return state.openid.refreshTokenPromise;
         },
@@ -493,20 +489,14 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        console.log('AWAIT IMPLEMENTED 1');
                         if (!(errorVm.response && errorVm.response.status && errorVm.response.status === 401)) return [3 /*break*/, 4];
-                        console.log('AWAIT IMPLEMENTED 2');
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
-                        // Refresh tokens and retry call
-                        console.log('AWAIT IMPLEMENTED 3');
                         return [4 /*yield*/, store.dispatch('refreshTokens').then(function (newTokens) {
-                                console.log('AWAIT IMPLEMENTED 7', newTokens);
                                 errorVm.response.config.headers.Authorization = "Bearer ".concat(newTokens.accessToken);
                                 // Use custom retryAxiosInstance if given
                                 if (retryAxiosInstance) {
-                                    console.log('[IF] RETRY AXIOS INSTANCE');
                                     return new Promise(function (resolve, reject) {
                                         retryAxiosInstance.request(errorVm.response.config).then(function (response) {
                                             resolve(response);
@@ -516,7 +506,6 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                     });
                                 }
                                 else {
-                                    console.log('[ELSE] RETRY AXIOS INSTANCE');
                                     return new Promise(function (resolve, reject) {
                                         axios.request(errorVm.response.config).then(function (response) {
                                             resolve(response);
@@ -526,7 +515,9 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                     });
                                 }
                             })];
-                    case 2: return [2 /*return*/, _a.sent()];
+                    case 2: 
+                    // Refresh tokens and retry call
+                    return [2 /*return*/, _a.sent()];
                     case 3:
                         _a.sent();
                         throw errorVm;

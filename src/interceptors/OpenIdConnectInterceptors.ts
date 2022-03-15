@@ -11,19 +11,14 @@ export class OpenIdConnectInterceptors {
   }
 
   public static async buildResponseErrorInterceptorCallback (errorVm: any, store: Store<any>, retryAxiosInstance?: any) {
-    console.log('AWAIT IMPLEMENTED 1')
     // Only intercept 401 unauthorized calls
     if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
-      console.log('AWAIT IMPLEMENTED 2')
       try {
         // Refresh tokens and retry call
-        console.log('AWAIT IMPLEMENTED 3')
         return await store.dispatch('refreshTokens').then((newTokens: any) => {
-          console.log('AWAIT IMPLEMENTED 7', newTokens)
           errorVm.response.config.headers.Authorization = `Bearer ${newTokens.accessToken}`
           // Use custom retryAxiosInstance if given
           if (retryAxiosInstance) {
-            console.log('[IF] RETRY AXIOS INSTANCE')
             return new Promise((resolve, reject) => {
               retryAxiosInstance.request(errorVm.response.config).then((response : any) => {
                 resolve(response)
@@ -32,7 +27,6 @@ export class OpenIdConnectInterceptors {
               })
             })
           } else {
-            console.log('[ELSE] RETRY AXIOS INSTANCE')
             return new Promise((resolve, reject) => {
               axios.request(errorVm.response.config).then(response => {
                 resolve(response)
