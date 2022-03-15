@@ -297,6 +297,7 @@ var OpenIdConnectModule = {
                 var promise = state.openid.repository.refreshTokens(state.openid.refreshToken);
                 dispatch('setRefreshTokenPromise', promise);
                 return promise.then(function (result) {
+                    console.log('AWAIT IMPLEMENTED 8', result);
                     dispatch('setRefreshTokenPromise', null);
                     var tokens = {
                         accessToken: result.data[Tokens.AccessToken],
@@ -500,6 +501,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                         // Refresh tokens and retry call
                         console.log('AWAIT IMPLEMENTED 3');
                         return [4 /*yield*/, store.dispatch('refreshTokens').then(function (newTokens) {
+                                console.log('AWAIT IMPLEMENTED 7', newTokens);
                                 errorVm.response.config.headers.Authorization = "Bearer ".concat(newTokens.accessToken);
                                 // Use custom retryAxiosInstance if given
                                 if (retryAxiosInstance) {

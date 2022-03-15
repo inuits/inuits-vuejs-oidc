@@ -154,6 +154,7 @@ export default {
 
         return promise.then(
           (result: any) => {
+            console.log('AWAIT IMPLEMENTED 8', result)
             dispatch('setRefreshTokenPromise', null)
             const tokens = {
               accessToken: result.data[Tokens.AccessToken],
