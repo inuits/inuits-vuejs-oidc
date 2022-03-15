@@ -169,6 +169,7 @@ export default {
           }
         )
       }
+      console.log('AWAIT IMPLEMENTED 6')
       console.log('Using existing refresh token promise')
       return state.openid.refreshTokenPromise
     },

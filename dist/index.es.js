@@ -310,6 +310,7 @@ var OpenIdConnectModule = {
                     dispatch('login');
                 });
             }
+            console.log('AWAIT IMPLEMENTED 6');
             console.log('Using existing refresh token promise');
             return state.openid.refreshTokenPromise;
         },
@@ -490,16 +491,19 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        console.log('AWAIT IMPLEMENTED 1');
                         if (!(errorVm.response && errorVm.response.status && errorVm.response.status === 401)) return [3 /*break*/, 4];
+                        console.log('AWAIT IMPLEMENTED 2');
                         _a.label = 1;
                     case 1:
                         _a.trys.push([1, 3, , 4]);
                         // Refresh tokens and retry call
-                        console.log('AWAIT IMPLEMENTED');
+                        console.log('AWAIT IMPLEMENTED 3');
                         return [4 /*yield*/, store.dispatch('refreshTokens').then(function (newTokens) {
                                 errorVm.response.config.headers.Authorization = "Bearer ".concat(newTokens.accessToken);
                                 // Use custom retryAxiosInstance if given
                                 if (retryAxiosInstance) {
+                                    console.log('AWAIT IMPLEMENTED 4');
                                     return new Promise(function (resolve, reject) {
                                         retryAxiosInstance.request(errorVm.response.config).then(function (response) {
                                             resolve(response);
@@ -509,6 +513,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                     });
                                 }
                                 else {
+                                    console.log('AWAIT IMPLEMENTED 5');
                                     return new Promise(function (resolve, reject) {
                                         axios.request(errorVm.response.config).then(function (response) {
                                             resolve(response);
