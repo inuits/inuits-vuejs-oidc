@@ -15,6 +15,7 @@ export class OpenIdConnectInterceptors {
     if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
       try {
         // Refresh tokens and retry call
+        console.log('AWAIT IMPLEMENTED')
         return await store.dispatch('refreshTokens').then((newTokens: any) => {
           errorVm.response.config.headers.Authorization = `Bearer ${newTokens.accessToken}`
           // Use custom retryAxiosInstance if given
