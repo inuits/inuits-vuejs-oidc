@@ -80,7 +80,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
     };
     OpenIdConnectRepository.prototype.getTokensFromProvider = function (authCode) {
         var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl('openid/redirect');
-        var openIdConnectTokenUrl = this.configuration.baseUrl + "/" + this.configuration.tokenEndpoint;
+        var openIdConnectTokenUrl = "".concat(this.configuration.baseUrl, "/").concat(this.configuration.tokenEndpoint);
         var body = {
             code: authCode,
             grant_type: 'authorization_code',
@@ -96,7 +96,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
     };
     OpenIdConnectRepository.prototype.getTokensFromServer = function (authCode) {
         var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(this.configuration.InternalRedirectUrl, false);
-        var serverTokenUrl = this.configuration.serverBaseUrl + "/" + this.configuration.serverTokenEndpoint;
+        var serverTokenUrl = "".concat(this.configuration.serverBaseUrl, "/").concat(this.configuration.serverTokenEndpoint);
         var body = {
             authCode: authCode,
             realm: this.configuration.baseUrl,
@@ -114,7 +114,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
         }
     };
     OpenIdConnectRepository.prototype.refreshTokensFromProvider = function (refreshToken) {
-        var openIdConnectTokenUrl = this.configuration.baseUrl + "/" + this.configuration.tokenEndpoint;
+        var openIdConnectTokenUrl = "".concat(this.configuration.baseUrl, "/").concat(this.configuration.tokenEndpoint);
         var body = {
             grant_type: 'refresh_token',
             client_id: this.configuration.clientId,
@@ -127,7 +127,7 @@ var OpenIdConnectRepository = /** @class */ (function () {
         });
     };
     OpenIdConnectRepository.prototype.refreshTokensFromServer = function (refreshToken) {
-        var serverRefreshUrl = this.configuration.serverBaseUrl + "/" + this.configuration.serverRefreshEndpoint;
+        var serverRefreshUrl = "".concat(this.configuration.serverBaseUrl, "/").concat(this.configuration.serverRefreshEndpoint);
         var body = {
             realm: this.configuration.baseUrl,
             clientId: this.configuration.clientId,
@@ -264,7 +264,7 @@ var OpenIdConnectModule = {
             var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(state.openid.configuration.InternalRedirectUrl, !state.openid.configuration.encodeRedirectUrl);
             // Build openIdConnect url
             var authEndpoint = OpenIdUrlHelpers.buildAuthEnpointWithReturnUrlEncoded(state.openid.configuration.authEndpoint, state.openid.configuration.encodeRedirectUrl);
-            var baseOpenIdConnectUrl = state.openid.configuration.baseUrl + "/" + authEndpoint;
+            var baseOpenIdConnectUrl = "".concat(state.openid.configuration.baseUrl, "/").concat(authEndpoint);
             var openIdParameters = {
                 scope: state.openid.configuration.scope
                     ? state.openid.configuration.scope
@@ -330,7 +330,7 @@ var OpenIdConnectModule = {
             }
             var redirectUrl = OpenIdUrlHelpers.buildInternalRedirectUrl(redirectRoute);
             // Build openIdConnect url
-            var baseOpenIdConnectUrl = state.openid.configuration.baseUrl + "/" + state.openid.configuration.logoutEndpoint;
+            var baseOpenIdConnectUrl = "".concat(state.openid.configuration.baseUrl, "/").concat(state.openid.configuration.logoutEndpoint);
             var openIdParameters = {
                 scope: state.openid.configuration.scope
                     ? state.openid.configuration.scope
@@ -489,19 +489,23 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
     OpenIdConnectInterceptors.buildRequestTokenInterceptorCallback = function (store) {
         return function (config) {
             var authorization = 'Authorization';
-            config.headers.common[authorization] = "Bearer " + store.getters.accessToken;
+            config.headers.common[authorization] = "Bearer ".concat(store.getters.accessToken);
             return config;
         };
     };
     OpenIdConnectInterceptors.buildResponseErrorInterceptorCallback = function (errorVm, store, retryAxiosInstance) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                // Only intercept 401 unauthorized calls
-                if (errorVm.response && errorVm.response.status && errorVm.response.status === 401) {
-                    try {
+                switch (_a.label) {
+                    case 0:
+                        if (!(errorVm.response && errorVm.response.status && errorVm.response.status === 401)) return [3 /*break*/, 4];
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
                         // Refresh tokens and retry call
-                        return [2 /*return*/, store.dispatch('refreshTokens').then(function (newTokens) {
-                                errorVm.response.config.headers.Authorization = "Bearer " + newTokens.accessToken;
+                        console.log('AWAIT IMPLEMENTED');
+                        return [4 /*yield*/, store.dispatch('refreshTokens').then(function (newTokens) {
+                                errorVm.response.config.headers.Authorization = "Bearer ".concat(newTokens.accessToken);
                                 // Use custom retryAxiosInstance if given
                                 if (retryAxiosInstance) {
                                     return new Promise(function (resolve, reject) {
@@ -522,12 +526,12 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                     });
                                 }
                             })];
-                    }
-                    catch (e) {
+                    case 2: return [2 /*return*/, _a.sent()];
+                    case 3:
+                        _a.sent();
                         throw errorVm;
-                    }
+                    case 4: throw errorVm;
                 }
-                throw errorVm;
             });
         });
     };
