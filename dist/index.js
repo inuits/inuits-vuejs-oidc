@@ -240,6 +240,7 @@ var OpenIdConnectModule = {
         },
         setTokens: function (_a, data) {
             var commit = _a.commit;
+            console.log('SETTING TOKENS!!!');
             commit('SET_TOKENS', data);
         },
         loadSessionTokens: function (_a, data) {
@@ -513,7 +514,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                 errorVm.response.config.headers.Authorization = "Bearer ".concat(newTokens.accessToken);
                                 // Use custom retryAxiosInstance if given
                                 if (retryAxiosInstance) {
-                                    console.log('AWAIT IMPLEMENTED 4');
+                                    console.log('[IF] RETRY AXIOS INSTANCE');
                                     return new Promise(function (resolve, reject) {
                                         retryAxiosInstance.request(errorVm.response.config).then(function (response) {
                                             resolve(response);
@@ -523,7 +524,7 @@ var OpenIdConnectInterceptors = /** @class */ (function () {
                                     });
                                 }
                                 else {
-                                    console.log('AWAIT IMPLEMENTED 5');
+                                    console.log('[ELSE] RETRY AXIOS INSTANCE');
                                     return new Promise(function (resolve, reject) {
                                         axios__default["default"].request(errorVm.response.config).then(function (response) {
                                             resolve(response);

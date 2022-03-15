@@ -73,6 +73,7 @@ export default {
       commit('CLEAR_TOKENS', data)
     },
     setTokens ({ commit }: any, data: any) {
+      console.log('SETTING TOKENS!!!')
       commit('SET_TOKENS', data)
     },
     loadSessionTokens ({ commit }: any, data: any) {

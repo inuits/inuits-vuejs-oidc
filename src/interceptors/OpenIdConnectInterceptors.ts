@@ -23,7 +23,7 @@ export class OpenIdConnectInterceptors {
           errorVm.response.config.headers.Authorization = `Bearer ${newTokens.accessToken}`
           // Use custom retryAxiosInstance if given
           if (retryAxiosInstance) {
-            console.log('AWAIT IMPLEMENTED 4')
+            console.log('[IF] RETRY AXIOS INSTANCE')
             return new Promise((resolve, reject) => {
               retryAxiosInstance.request(errorVm.response.config).then((response : any) => {
                 resolve(response)
@@ -32,7 +32,7 @@ export class OpenIdConnectInterceptors {
               })
             })
           } else {
-            console.log('AWAIT IMPLEMENTED 5')
+            console.log('[ELSE] RETRY AXIOS INSTANCE')
             return new Promise((resolve, reject) => {
               axios.request(errorVm.response.config).then(response => {
                 resolve(response)
