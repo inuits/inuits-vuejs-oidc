@@ -271,6 +271,8 @@ var OpenIdConnectModule = {
             if (finalRedirectRoute) {
                 RedirectRouteStorageHelpers.setRedirectRoute(finalRedirectRoute);
             }
+            console.log('set redirect url right before going to login');
+            sessionStorage.setItem('redirectUrl', window.location.pathname);
             window.location.href = openIdConnectUrl;
         },
         fetchTokens: function (_a, authCode) {
